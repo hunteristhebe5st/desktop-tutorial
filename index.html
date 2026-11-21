@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hunter's App</title>
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">H</span>
+      <div>
+        <h1>Hunter's App</h1>
+        <p id="greeting" class="muted">Welcome back</p>
+      </div>
+    </div>
+    <div id="clock" class="clock"></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" class="active">🏠 Home</button>
+    <button data-tab="gmail">✉️ Gmail</button>
+    <button data-tab="apps">📱 Apps</button>
+    <button data-tab="games">🎮 Games</button>
+    <button data-tab="money">💳 Transactions</button>
+    <button data-tab="settings">⚙️ Settings</button>
+  </nav>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="panel active">
+      <div class="stats">
+        <div class="stat"><span class="label">Balance</span><span id="stat-balance" class="value">$0.00</span></div>
+        <div class="stat"><span class="label">Spent this month</span><span id="stat-spent" class="value">$0.00</span></div>
+        <div class="stat"><span class="label">Emails to follow up</span><span id="stat-mail" class="value">0</span></div>
+        <div class="stat"><span class="label">Games playing</span><span id="stat-games" class="value">0</span></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Quick launch</h2>
+          <div id="home-apps" class="app-grid small"></div>
+        </div>
+        <div class="card">
+          <h2>Recent transactions</h2>
+          <ul id="home-tx" class="list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- GMAIL -->
+    <section id="gmail" class="panel">
+      <div class="card">
+        <h2>Open Gmail</h2>
+        <div class="btn-row">
+          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">📥 Inbox</a>
+          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/is%3Aunread">🔵 Unread</a>
+          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#starred">⭐ Starred</a>
+          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Apurchases">🧾 Purchases</a>
+          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Aupdates">🔔 Updates</a>
+          <a class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox?compose=new">✏️ Compose</a>
+        </div>
+        <form id="mail-search" class="row">
+          <input id="mail-q" placeholder="Search Gmail (e.g. from:amazon receipts)">
+          <button class="btn primary">Search</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Emails to follow up on</h2>
+        <form id="mail-form" class="row">
+          <input id="mail-from" placeholder="Who is it from?" required>
+          <input id="mail-subject" placeholder="What's it about?" required>
+          <button class="btn primary">Add</button>
+        </form>
+        <ul id="mail-list" class="list"></ul>
+      </div>
+    </section>
+
+    <!-- APPS -->
+    <section id="apps" class="panel">
+      <div class="card">
+        <h2>My apps</h2>
+        <div id="app-grid" class="app-grid"></div>
+      </div>
+      <div class="card">
+        <h2>Add an app</h2>
+        <form id="app-form" class="row">
+          <input id="app-icon" placeholder="Emoji" maxlength="4" class="short">
+          <input id="app-name" placeholder="Name" required>
+          <input id="app-url" placeholder="https://..." type="url" required>
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- GAMES -->
+    <section id="games" class="panel">
+      <div class="card">
+        <h2>Add a game</h2>
+        <form id="game-form" class="row">
+          <input id="game-name" placeholder="Game name" required>
+          <select id="game-platform">
+            <option>PC</option><option>PlayStation</option><option>Xbox</option>
+            <option>Switch</option><option>Mobile</option><option>Roblox</option><option>Other</option>
+          </select>
+          <select id="game-status">
+            <option value="playing">Playing</option>
+            <option value="wishlist">Wishlist</option>
+            <option value="done">Beat it</option>
+          </select>
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+      <div class="filter-row" id="game-filter">
+        <button data-f="all" class="chip active">All</button>
+        <button data-f="playing" class="chip">Playing</button>
+        <button data-f="wishlist" class="chip">Wishlist</button>
+        <button data-f="done" class="chip">Beat it</button>
+      </div>
+      <div id="game-list" class="game-grid"></div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section id="money" class="panel">
+      <div class="stats">
+        <div class="stat"><span class="label">Money in</span><span id="m-in" class="value good">$0.00</span></div>
+        <div class="stat"><span class="label">Money out</span><span id="m-out" class="value bad">$0.00</span></div>
+        <div class="stat"><span class="label">Balance</span><span id="m-bal" class="value">$0.00</span></div>
+      </div>
+      <div class="card">
+        <h2>Add a transaction</h2>
+        <form id="tx-form" class="row">
+          <select id="tx-type">
+            <option value="out">Spent</option>
+            <option value="in">Got paid</option>
+          </select>
+          <input id="tx-desc" placeholder="What for?" required>
+          <input id="tx-amount" type="number" step="0.01" min="0.01" placeholder="Amount" required class="short">
+          <select id="tx-cat">
+            <option>Food</option><option>Games</option><option>Shopping</option><option>Subscriptions</option>
+            <option>Transport</option><option>Allowance</option><option>Job</option><option>Gift</option><option>Other</option>
+          </select>
+          <input id="tx-date" type="date" required>
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Spending by category</h2>
+          <div id="cat-bars"></div>
+        </div>
+        <div class="card">
+          <h2>All transactions</h2>
+          <ul id="tx-list" class="list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="panel">
+      <div class="card">
+        <h2>Your name</h2>
+        <form id="name-form" class="row">
+          <input id="name-input" placeholder="Hunter">
+          <button class="btn primary">Save</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted">Everything is saved in this browser only. Download a backup to keep it safe or move it to another device.</p>
+        <div class="btn-row">
+          <button id="export-btn" class="btn">⬇️ Download backup</button>
+          <label class="btn">⬆️ Restore backup<input id="import-file" type="file" accept="application/json" hidden></label>
+          <button id="reset-btn" class="btn danger">🗑️ Erase everything</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
