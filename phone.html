@@ -45,7 +45,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+body, button, a, label, input, select, .cell, .widget { touch-action: manipulation; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.3 var(--font);
   -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
@@ -1019,6 +1020,20 @@ button.cell:active, a.cell:active { background: var(--fill); }
     }
   }, true);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#sheet").hidden) closeSheet(); });
+
+  // ---------- No double-tap zoom ----------
+  // A quick second tap counts as a normal tap instead of zooming the page.
+  let lastTouch = 0;
+  document.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    const t = e.target;
+    if (now - lastTouch < 350 && !t.closest("input, select, textarea") && e.changedTouches.length === 1) {
+      e.preventDefault();
+      t.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    }
+    lastTouch = now;
+  }, { passive: false });
+  document.addEventListener("gesturestart", (e) => e.preventDefault());
 
   $("#mail-q").addEventListener("input", (e) => {
     const q = e.target.value.trim();
