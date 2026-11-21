@@ -1,164 +1,432 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hunter's App</title>
-  <meta name="theme-color" content="#4f46e5">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hunter's App</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Hunter's App">
+<meta name="theme-color" content="#f3f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101511" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: app shell — header, one panel at a time, tab bar pinned to the bottom on phones, on top on wide screens. Default accent is hunter green; Settings can swap it. */
+:root {
+  --bg: #f3f5f2;
+  --card: #ffffff;
+  --fg: #1a211c;
+  --muted: #5f6b62;
+  --line: #dde3dc;
+  --accent: #355e3b;
+  --accent-fg: #ffffff;
+  --accent-soft: #e4ede3;
+  --good: #1f7a3a;
+  --bad: #b4441b;
+  --gold: #a8740a;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --r: 14px;
+  --nav-h: 62px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101511; --card: #19201a; --fg: #e8eee7; --muted: #9aa79c; --line: #2a342c;
+    --accent: #7fbf8a; --accent-fg: #0e1a10; --accent-soft: #233328; --good: #6fd68c; --bad: #f29a6b; --gold: #f0c24f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101511; --card: #19201a; --fg: #e8eee7; --muted: #9aa79c; --line: #2a342c;
+  --accent: #7fbf8a; --accent-fg: #0e1a10; --accent-soft: #233328; --good: #6fd68c; --bad: #f29a6b; --gold: #f0c24f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.02rem; font-weight: 700; }
+h3 { font-size: .95rem; font-weight: 600; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+header.top { padding-block: 16px 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.brand { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.logo {
+  flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--accent); color: var(--accent-fg);
+  display: grid; place-items: center; font: 700 1.35rem var(--font-display);
+}
+#greeting { margin: 2px 0 0; font-size: .9rem; }
+.clock { text-align: right; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sync { font-size: .75rem; }
+
+nav.tabs { display: flex; gap: 6px; }
+nav.tabs button {
+  font: 500 .9rem var(--font-body); color: var(--fg); background: var(--card);
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+nav.tabs button svg { width: 18px; height: 18px; }
+nav.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+nav.tabs-top { padding-block: 4px 12px; overflow-x: auto; }
+
+main { padding-block: 4px 32px; }
+.panel { display: grid; gap: 14px; }
+.sub-panel { display: grid; gap: 14px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card-head a, .linkish { font-size: .85rem; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; text-decoration: none; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stats.three { grid-template-columns: repeat(3, 1fr); }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.stat .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.stat .value { font: 700 1.4rem var(--font-display); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat .note { font-size: .78rem; color: var(--muted); }
+.good { color: var(--good); } .bad { color: var(--bad); }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+input, select {
+  font: 16px var(--font-body); color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; flex: 1 1 150px; min-width: 0;
+}
+input.short, select.short { flex: 0 1 120px; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn {
+  font: 500 .92rem var(--font-body); color: var(--fg); background: var(--accent-soft);
+  border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn.primary { background: var(--accent); color: var(--accent-fg); }
+.btn.danger { color: var(--bad); background: transparent; border-color: var(--line); }
+.btn.sm { padding: 5px 12px; font-size: .85rem; }
+.links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.list li:last-child { border-bottom: 0; }
+.list .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.list li.done .grow > div:first-child { text-decoration: line-through; color: var(--muted); }
+.sub { color: var(--muted); font-size: .8rem; margin-top: 2px; }
+.amt { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.empty { color: var(--muted); font-size: .9rem; padding: 4px 0; }
+.x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1.25rem; line-height: 1; padding: 6px; }
+.check { width: 22px; height: 22px; flex: none; accent-color: var(--accent); margin: 0; }
+.due { font-size: .72rem; padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--muted); white-space: nowrap; }
+.due.late { background: var(--bad); color: var(--card); }
+.due.soon { background: var(--accent); color: var(--accent-fg); }
+
+.apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
+.app {
+  position: relative; display: grid; justify-items: center; gap: 6px; padding: 14px 4px 10px;
+  border-radius: 14px; background: var(--accent-soft); color: var(--fg); text-decoration: none; font-size: .82rem; text-align: center;
+}
+.app .ico { font-size: 1.8rem; line-height: 1; }
+.app .x { position: absolute; top: 0; right: 0; font-size: 1rem; }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font: 500 .85rem var(--font-body); color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.game { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; }
+.game .top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.game .name { font-weight: 600; overflow-wrap: anywhere; }
+.pill { font-size: .72rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--muted); }
+.pill.playing { background: var(--accent); color: var(--accent-fg); }
+.game .bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.hours { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.game select { flex: none; padding: 6px 8px; font-size: 14px; }
+
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.trophy { display: grid; justify-items: center; gap: 4px; text-align: center; padding: 14px 8px 12px; border-radius: 12px; background: var(--accent-soft); }
+.trophy svg { width: 34px; height: 34px; color: var(--gold); }
+.trophy .tn { font-weight: 600; font-size: .85rem; overflow-wrap: anywhere; }
+.trophy .tsub { font-size: .72rem; color: var(--muted); }
+
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; gap: 4px; }
+.bar .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; }
+.bar .lbl span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.bar .track { height: 10px; background: var(--accent-soft); border-radius: 999px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 999px; }
+.bar.big .track { height: 14px; }
+.bar.won .fill { background: var(--good); }
+
+.goal { display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.goal:last-child { border-bottom: 0; }
+.goal .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.goal .nums { font-variant-numeric: tabular-nums; font-size: .9rem; }
+.goal .row input { flex: 1 1 90px; padding: 7px 10px; }
+
+.weather { display: flex; align-items: center; gap: 14px; }
+.weather svg { width: 42px; height: 42px; color: var(--gold); flex: none; }
+
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch {
+  width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--card); cursor: pointer;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--fg); }
+
+.notice { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: .9rem; display: grid; gap: 6px; }
+.confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+nav.tabs-bottom { display: none; }
+@media (max-width: 720px) {
+  nav.tabs-top { display: none; }
+  nav.tabs-bottom {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: var(--card); border-top: 1px solid var(--line);
+    padding: 6px max(4px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+    justify-content: space-around; gap: 0;
+  }
+  nav.tabs-bottom button {
+    flex: 1; flex-direction: column; gap: 2px; border: 0; background: none; border-radius: 10px;
+    font-size: .66rem; padding: 6px 0; color: var(--muted); min-width: 0;
+  }
+  nav.tabs-bottom button[aria-selected="true"] { background: none; color: var(--accent); }
+  nav.tabs-bottom button svg { width: 22px; height: 22px; }
+  main { padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px)); }
+  .grid2 { grid-template-columns: 1fr; }
+  .clock #clock { white-space: pre-line; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stats.three { grid-template-columns: 1fr 1fr 1fr; }
+  .stats.three .stat .value { font-size: 1.05rem; }
+  .links { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: no-preference) { .btn, .chip, nav.tabs button, .bar .fill { transition: background .15s, color .15s, width .3s; } }
+</style>
+<style id="accent-style"></style>
 </head>
 <body>
-  <header class="topbar">
+
+<div class="wrap">
+  <header class="top">
     <div class="brand">
-      <span class="logo">H</span>
+      <div class="logo" aria-hidden="true">H</div>
       <div>
         <h1>Hunter's App</h1>
         <p id="greeting" class="muted">Welcome back</p>
       </div>
     </div>
-    <div id="clock" class="clock"></div>
+    <div class="clock"><div id="clock"></div><div id="sync" class="sync">Saved on this device</div></div>
   </header>
+  <nav class="tabs tabs-top" id="tabs-top" aria-label="Sections"></nav>
+</div>
 
-  <nav class="tabs" id="tabs">
-    <button data-tab="home" class="active">🏠 Home</button>
-    <button data-tab="gmail">✉️ Gmail</button>
-    <button data-tab="apps">📱 Apps</button>
-    <button data-tab="games">🎮 Games</button>
-    <button data-tab="money">💳 Transactions</button>
-    <button data-tab="settings">⚙️ Settings</button>
-  </nav>
-
-  <main>
-    <!-- HOME -->
-    <section id="home" class="panel active">
-      <div class="stats">
-        <div class="stat"><span class="label">Balance</span><span id="stat-balance" class="value">$0.00</span></div>
-        <div class="stat"><span class="label">Spent this month</span><span id="stat-spent" class="value">$0.00</span></div>
-        <div class="stat"><span class="label">Emails to follow up</span><span id="stat-mail" class="value">0</span></div>
-        <div class="stat"><span class="label">Games playing</span><span id="stat-games" class="value">0</span></div>
-      </div>
-      <div class="grid2">
-        <div class="card">
-          <h2>Quick launch</h2>
-          <div id="home-apps" class="app-grid small"></div>
-        </div>
-        <div class="card">
-          <h2>Recent transactions</h2>
-          <ul id="home-tx" class="list"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- GMAIL -->
-    <section id="gmail" class="panel">
+<main class="wrap">
+  <!-- HOME -->
+  <section id="home" class="panel">
+    <div class="stats">
+      <div class="stat"><span class="label">Balance</span><span id="s-bal" class="value">$0.00</span></div>
+      <div class="stat"><span class="label">To-dos left</span><span id="s-todo" class="value">0</span><span id="s-todo-note" class="note"></span></div>
+      <div class="stat"><span class="label">Bills a month</span><span id="s-subs" class="value">$0.00</span></div>
+      <div class="stat"><span class="label">Hours played</span><span id="s-hours" class="value">0</span></div>
+    </div>
+    <div class="grid2">
       <div class="card">
-        <h2>Open Gmail</h2>
-        <div class="btn-row">
-          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">📥 Inbox</a>
-          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/is%3Aunread">🔵 Unread</a>
-          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#starred">⭐ Starred</a>
-          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Apurchases">🧾 Purchases</a>
-          <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Aupdates">🔔 Updates</a>
-          <a class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox?compose=new">✏️ Compose</a>
-        </div>
-        <form id="mail-search" class="row">
-          <input id="mail-q" placeholder="Search Gmail (e.g. from:amazon receipts)">
-          <button class="btn primary">Search</button>
-        </form>
+        <div class="card-head"><h2>Up next</h2><button class="linkish" data-tab="todo">See all</button></div>
+        <ul id="home-todo" class="list"></ul>
       </div>
       <div class="card">
-        <h2>Emails to follow up on</h2>
-        <form id="mail-form" class="row">
-          <input id="mail-from" placeholder="Who is it from?" required>
-          <input id="mail-subject" placeholder="What's it about?" required>
-          <button class="btn primary">Add</button>
-        </form>
-        <ul id="mail-list" class="list"></ul>
-      </div>
-    </section>
-
-    <!-- APPS -->
-    <section id="apps" class="panel">
-      <div class="card">
-        <h2>My apps</h2>
-        <div id="app-grid" class="app-grid"></div>
+        <div class="card-head"><h2>Weather</h2><button class="linkish" data-tab="more">Change city</button></div>
+        <div id="home-weather"></div>
       </div>
       <div class="card">
-        <h2>Add an app</h2>
-        <form id="app-form" class="row">
-          <input id="app-icon" placeholder="Emoji" maxlength="4" class="short">
-          <input id="app-name" placeholder="Name" required>
-          <input id="app-url" placeholder="https://..." type="url" required>
-          <button class="btn primary">Add</button>
-        </form>
+        <div class="card-head"><h2>Saving up</h2><button class="linkish" data-goto-money="goals">See all</button></div>
+        <div id="home-goal"></div>
       </div>
-    </section>
-
-    <!-- GAMES -->
-    <section id="games" class="panel">
       <div class="card">
-        <h2>Add a game</h2>
-        <form id="game-form" class="row">
-          <input id="game-name" placeholder="Game name" required>
-          <select id="game-platform">
-            <option>PC</option><option>PlayStation</option><option>Xbox</option>
-            <option>Switch</option><option>Mobile</option><option>Roblox</option><option>Other</option>
-          </select>
-          <select id="game-status">
-            <option value="playing">Playing</option>
-            <option value="wishlist">Wishlist</option>
-            <option value="done">Beat it</option>
-          </select>
-          <button class="btn primary">Add</button>
-        </form>
+        <div class="card-head"><h2>Bills coming up</h2><button class="linkish" data-goto-money="subs">See all</button></div>
+        <ul id="home-subs" class="list"></ul>
       </div>
-      <div class="filter-row" id="game-filter">
-        <button data-f="all" class="chip active">All</button>
-        <button data-f="playing" class="chip">Playing</button>
-        <button data-f="wishlist" class="chip">Wishlist</button>
-        <button data-f="done" class="chip">Beat it</button>
+      <div class="card"><h2>Quick launch</h2><div id="home-apps" class="apps"></div></div>
+      <div class="card">
+        <div class="card-head"><h2>Recent transactions</h2><button class="linkish" data-goto-money="tx">See all</button></div>
+        <ul id="home-tx" class="list"></ul>
       </div>
-      <div id="game-list" class="game-grid"></div>
-    </section>
+    </div>
+  </section>
 
-    <!-- TRANSACTIONS -->
-    <section id="money" class="panel">
-      <div class="stats">
-        <div class="stat"><span class="label">Money in</span><span id="m-in" class="value good">$0.00</span></div>
-        <div class="stat"><span class="label">Money out</span><span id="m-out" class="value bad">$0.00</span></div>
-        <div class="stat"><span class="label">Balance</span><span id="m-bal" class="value">$0.00</span></div>
-      </div>
+  <!-- TO-DO -->
+  <section id="todo" class="panel" hidden>
+    <div class="card">
+      <h2>Add a to-do</h2>
+      <form id="todo-form" class="row">
+        <input id="todo-text" placeholder="What do you need to do?" required>
+        <select id="todo-kind" class="short"><option>Homework</option><option>Chore</option><option>Test</option><option>Other</option></select>
+        <input id="todo-due" type="date" class="short" aria-label="Due date">
+        <button class="btn primary">Add</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>To do</h2>
+      <ul id="todo-list" class="list"></ul>
+    </div>
+    <div class="card" id="done-card">
+      <div class="card-head"><h2>Finished</h2><button class="linkish" id="clear-done">Clear finished</button></div>
+      <ul id="done-list" class="list"></ul>
+    </div>
+  </section>
+
+  <!-- MONEY -->
+  <section id="money" class="panel" hidden>
+    <div class="stats three">
+      <div class="stat"><span class="label">Money in</span><span id="m-in" class="value good">$0.00</span></div>
+      <div class="stat"><span class="label">Money out</span><span id="m-out" class="value bad">$0.00</span></div>
+      <div class="stat"><span class="label">Balance</span><span id="m-bal" class="value">$0.00</span></div>
+    </div>
+    <div class="chips" id="money-tabs">
+      <button class="chip" data-m="tx" aria-pressed="true">Transactions</button>
+      <button class="chip" data-m="goals" aria-pressed="false">Savings goals</button>
+      <button class="chip" data-m="subs" aria-pressed="false">Subscriptions</button>
+    </div>
+
+    <div class="sub-panel" data-mpanel="tx">
       <div class="card">
         <h2>Add a transaction</h2>
         <form id="tx-form" class="row">
-          <select id="tx-type">
-            <option value="out">Spent</option>
-            <option value="in">Got paid</option>
-          </select>
+          <select id="tx-type" class="short"><option value="out">I spent</option><option value="in">I got</option></select>
           <input id="tx-desc" placeholder="What for?" required>
-          <input id="tx-amount" type="number" step="0.01" min="0.01" placeholder="Amount" required class="short">
+          <input id="tx-amount" type="number" step="0.01" min="0.01" placeholder="$0.00" required inputmode="decimal" class="short">
           <select id="tx-cat">
             <option>Food</option><option>Games</option><option>Shopping</option><option>Subscriptions</option>
             <option>Transport</option><option>Allowance</option><option>Job</option><option>Gift</option><option>Other</option>
           </select>
-          <input id="tx-date" type="date" required>
+          <input id="tx-date" type="date" required aria-label="Date">
           <button class="btn primary">Add</button>
         </form>
       </div>
       <div class="grid2">
-        <div class="card">
-          <h2>Spending by category</h2>
-          <div id="cat-bars"></div>
-        </div>
-        <div class="card">
-          <h2>All transactions</h2>
-          <ul id="tx-list" class="list"></ul>
-        </div>
+        <div class="card"><h2>Where my money goes</h2><div id="cat-bars" class="bars"></div></div>
+        <div class="card"><h2>All transactions</h2><ul id="tx-list" class="list"></ul></div>
       </div>
-    </section>
+    </div>
 
-    <!-- SETTINGS -->
-    <section id="settings" class="panel">
+    <div class="sub-panel" data-mpanel="goals" hidden>
+      <div class="card">
+        <h2>New savings goal</h2>
+        <form id="goal-form" class="row">
+          <input id="goal-name" placeholder="What are you saving for?" required>
+          <input id="goal-target" type="number" step="0.01" min="1" placeholder="Goal $" required inputmode="decimal" class="short">
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>My goals</h2>
+        <div id="goal-list"></div>
+      </div>
+    </div>
+
+    <div class="sub-panel" data-mpanel="subs" hidden>
+      <div class="stats three">
+        <div class="stat"><span class="label">Per month</span><span id="sub-month" class="value">$0.00</span></div>
+        <div class="stat"><span class="label">Per year</span><span id="sub-year" class="value">$0.00</span></div>
+        <div class="stat"><span class="label">Next charge</span><span id="sub-next" class="value">None</span></div>
+      </div>
+      <div class="card">
+        <h2>Add a subscription</h2>
+        <form id="sub-form" class="row">
+          <input id="sub-name" placeholder="Like Game Pass or Spotify" required>
+          <input id="sub-price" type="number" step="0.01" min="0.01" placeholder="$ a month" required inputmode="decimal" class="short">
+          <select id="sub-day" class="short" aria-label="Day it charges"></select>
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>My subscriptions</h2>
+        <ul id="sub-list" class="list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES -->
+  <section id="games" class="panel" hidden>
+    <div class="stats three">
+      <div class="stat"><span class="label">Hours played</span><span id="g-hours" class="value">0</span></div>
+      <div class="stat"><span class="label">Playing now</span><span id="g-playing" class="value">0</span></div>
+      <div class="stat"><span class="label">Trophies</span><span id="g-done" class="value">0</span></div>
+    </div>
+    <div class="card">
+      <h2>Add a game</h2>
+      <form id="game-form" class="row">
+        <input id="game-name" placeholder="Game name" required>
+        <select id="game-platform" class="short">
+          <option>PC</option><option>PlayStation</option><option>Xbox</option><option>Switch</option>
+          <option>iPhone</option><option>Roblox</option><option>Other</option>
+        </select>
+        <select id="game-status" class="short">
+          <option value="playing">Playing</option><option value="wishlist">Want it</option><option value="done">Beat it</option>
+        </select>
+        <button class="btn primary">Add</button>
+      </form>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>Most played</h2><div id="game-chart" class="bars"></div></div>
+      <div class="card"><h2>Trophy shelf</h2><div id="shelf" class="shelf"></div></div>
+    </div>
+    <div class="chips" id="game-filter">
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="playing" aria-pressed="false">Playing</button>
+      <button class="chip" data-f="wishlist" aria-pressed="false">Want it</button>
+      <button class="chip" data-f="done" aria-pressed="false">Beat it</button>
+    </div>
+    <div id="game-list" class="games"></div>
+  </section>
+
+  <!-- GMAIL -->
+  <section id="gmail" class="panel" hidden>
+    <div class="card">
+      <h2>Open Gmail</h2>
+      <div class="links">
+        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">Inbox</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/is%3Aunread">Unread</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#starred">Starred</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Apurchases">Purchases</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Aupdates">Updates</a>
+        <a class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox?compose=new">Write email</a>
+      </div>
+      <div class="row">
+        <input id="mail-q" placeholder="Search Gmail, like: from:amazon" autocomplete="off">
+        <a id="mail-go" class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">Search</a>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Emails I need to answer</h2>
+      <form id="mail-form" class="row">
+        <input id="mail-from" placeholder="Who is it from?" required>
+        <input id="mail-subject" placeholder="What's it about?" required>
+        <button class="btn primary">Add</button>
+      </form>
+      <ul id="mail-list" class="list"></ul>
+    </div>
+  </section>
+
+  <!-- MORE -->
+  <section id="more" class="panel" hidden>
+    <div class="card">
+      <h2>App color</h2>
+      <div class="swatches" id="swatches"></div>
+    </div>
+    <div class="grid2">
       <div class="card">
         <h2>Your name</h2>
         <form id="name-form" class="row">
@@ -167,17 +435,461 @@
         </form>
       </div>
       <div class="card">
-        <h2>Backup</h2>
-        <p class="muted">Everything is saved in this browser only. Download a backup to keep it safe or move it to another device.</p>
-        <div class="btn-row">
-          <button id="export-btn" class="btn">⬇️ Download backup</button>
-          <label class="btn">⬆️ Restore backup<input id="import-file" type="file" accept="application/json" hidden></label>
-          <button id="reset-btn" class="btn danger">🗑️ Erase everything</button>
-        </div>
+        <h2>Your city for weather</h2>
+        <form id="city-form" class="row">
+          <input id="city-input" placeholder="Like Dallas, TX">
+          <button class="btn primary">Save</button>
+        </form>
       </div>
-    </section>
-  </main>
+    </div>
+    <p id="saved-note" class="sub" hidden>Saved.</p>
+    <div class="card"><h2>My apps</h2><div id="app-grid" class="apps"></div></div>
+    <div class="card">
+      <h2>Add an app or website</h2>
+      <form id="app-form" class="row">
+        <input id="app-icon" placeholder="Emoji" maxlength="4" class="short">
+        <input id="app-name" placeholder="Name" required>
+        <input id="app-url" placeholder="website.com" required inputmode="url" autocapitalize="off">
+        <button class="btn primary">Add</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Backup</h2>
+      <p class="muted">Your stuff is saved on this phone. Save a backup to Files now and then so you never lose it.</p>
+      <div class="row">
+        <button id="export-btn" type="button" class="btn">Save backup</button>
+        <label class="btn" for="import-file">Restore backup</label>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p id="backup-note" class="sub" hidden></p>
+    </div>
+    <div class="card">
+      <h2>Start over</h2>
+      <p class="muted">Erases everything in the app.</p>
+      <div class="confirm">
+        <button id="reset-btn" class="btn danger">Erase everything</button>
+        <span id="reset-confirm" class="confirm" hidden>
+          <span>Are you sure?</span>
+          <button id="reset-yes" class="btn danger">Yes, erase</button>
+          <button id="reset-no" class="btn">Cancel</button>
+        </span>
+      </div>
+    </div>
+  </section>
+</main>
 
-  <script src="app.js"></script>
+<nav class="tabs tabs-bottom" id="tabs-bottom" aria-label="Sections"></nav>
+
+<script>
+(() => {
+  const KEY = "hunters-app-v1";
+  const TABS = [
+    ["home", "Home", '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
+    ["todo", "To-do", '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/>'],
+    ["money", "Money", '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
+    ["games", "Games", '<path d="M7 8h10a4 4 0 0 1 4 4v3a3 3 0 0 1-5.4 1.8L14.5 15h-5l-1.1 1.8A3 3 0 0 1 3 15v-3a4 4 0 0 1 4-4z"/><path d="M8 11v3M6.5 12.5h3"/>'],
+    ["gmail", "Gmail", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'],
+    ["more", "More", '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'],
+  ];
+  const COLORS = {
+    green:  { name: "Hunter green", l: ["#355e3b", "#e4ede3"], d: ["#7fbf8a", "#233328", "#0e1a10"] },
+    blue:   { name: "Blue",   l: ["#2456a6", "#e3ebf8"], d: ["#84aef0", "#1e2a40", "#0b1424"] },
+    red:    { name: "Red",    l: ["#b3261e", "#f8e4e2"], d: ["#f2928b", "#3a1f1d", "#2a0a08"] },
+    purple: { name: "Purple", l: ["#6b3fa0", "#eee6f7"], d: ["#c3a2ec", "#2e2340", "#1c0f2c"] },
+    orange: { name: "Orange", l: ["#b0520c", "#fbeadb"], d: ["#f5a65e", "#3a2818", "#2a1505"] },
+    teal:   { name: "Teal",   l: ["#0e7470", "#ddf1ef"], d: ["#6fd1c9", "#183634", "#052523"] },
+    pink:   { name: "Pink",   l: ["#b0306e", "#f9e3ee"], d: ["#f29bc6", "#3c1f2e", "#2b0a1b"] },
+    black:  { name: "Black",  l: ["#22262b", "#e6e8eb"], d: ["#d4d8dd", "#2a2e33", "#121417"] },
+  };
+  const TROPHY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm10 4v3a2 2 0 0 0 1-1.7V7zM7 7H6v1.3A2 2 0 0 0 7 10z"/></svg>';
+  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+
+  const defaults = () => ({
+    name: "Hunter", city: "", color: "green",
+    apps: [
+      { icon: "✉️", name: "Gmail", url: "https://mail.google.com" },
+      { icon: "▶️", name: "YouTube", url: "https://youtube.com" },
+      { icon: "🎮", name: "Roblox", url: "https://www.roblox.com" },
+      { icon: "🕹️", name: "Steam", url: "https://store.steampowered.com" },
+      { icon: "🎧", name: "Spotify", url: "https://open.spotify.com" },
+      { icon: "💬", name: "Discord", url: "https://discord.com/app" },
+      { icon: "📁", name: "Drive", url: "https://drive.google.com" },
+      { icon: "📷", name: "Instagram", url: "https://instagram.com" },
+    ],
+    games: [], tx: [], mail: [], todos: [], goals: [], subs: [],
+  });
+
+  const $ = (s) => document.querySelector(s);
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const money = (n) => (n < 0 ? "-" : "") + "$" + Math.abs(n).toFixed(2);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const iso = (d) => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const today = () => iso(new Date());
+  const parse = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const prettyDate = (s) => parse(s).toLocaleDateString([], { month: "short", day: "numeric" });
+  const daysUntil = (s) => Math.round((parse(s) - parse(today())) / 86400000);
+  const safeUrl = (u) => { u = String(u || "").trim(); if (!/^https?:\/\//i.test(u)) u = "https://" + u; return /^https?:\/\/[^\s"<>]+$/i.test(u) ? u : "#"; };
+  const round2 = (n) => Math.round(n * 100) / 100;
+
+  // ---------- Storage: this device first, then your claude.ai account ----------
+  let state = defaults();
+  try { const raw = localStorage.getItem(KEY); if (raw) state = { ...defaults(), ...JSON.parse(raw) }; } catch (e) {}
+  let cloud = null, saving = false, pending = false, timer;
+  const setSync = (t) => { $("#sync").textContent = t; };
+  async function pushCloud() {
+    if (!cloud) return;
+    if (saving) { pending = true; return; }
+    saving = true;
+    try { await cloud.set({ state: JSON.stringify(state), savedAt: Date.now() }); setSync("Saved to your account"); }
+    catch (e) { setSync(e && e.code === "quota_exceeded" ? "Account storage full" : "Saved on this device"); }
+    saving = false;
+    if (pending) { pending = false; pushCloud(); }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    render();
+    clearTimeout(timer); timer = setTimeout(pushCloud, 600);
+  }
+  (async () => {
+    try {
+      const [db, user] = await Promise.all([window.claude?.use?.("db"), window.claude?.use?.("user")]);
+      if (!db || !user) return;
+      const id = await user.id();
+      if (!id) return;
+      const ref = db.doc("data/users/" + id + "/main");
+      const snap = await Promise.race([ref.get(), new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 10000))]);
+      cloud = ref;
+      if (snap.exists && snap.data()?.state) {
+        state = { ...defaults(), ...JSON.parse(snap.data().state) };
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        render();
+        setSync("Saved to your account");
+      } else pushCloud();
+    } catch (e) { /* keep working on this device */ }
+  })();
+
+  // ---------- Tabs ----------
+  const tabHtml = TABS.map(([id, label, path]) =>
+    `<button type="button" data-tab="${id}" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`).join("");
+  $("#tabs-top").innerHTML = tabHtml;
+  $("#tabs-bottom").innerHTML = tabHtml;
+  function showTab(id) {
+    if (!TABS.some((x) => x[0] === id)) id = "home";
+    document.querySelectorAll("nav [data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
+    document.querySelectorAll(".panel").forEach((p) => (p.hidden = p.id !== id));
+    try { localStorage.setItem(KEY + "-tab", id); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+  function showMoney(m) {
+    document.querySelectorAll("#money-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.m === m)));
+    document.querySelectorAll("[data-mpanel]").forEach((p) => (p.hidden = p.dataset.mpanel !== m));
+  }
+
+  // ---------- Color ----------
+  function applyColor() {
+    const c = COLORS[state.color] || COLORS.green;
+    const dark = `--accent:${c.d[0]};--accent-soft:${c.d[1]};--accent-fg:${c.d[2]};`;
+    $("#accent-style").textContent =
+      `:root{--accent:${c.l[0]};--accent-soft:${c.l[1]};--accent-fg:#ffffff;}` +
+      `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${dark}}}` +
+      `:root[data-theme="dark"]{${dark}}`;
+  }
+  $("#swatches").innerHTML = Object.entries(COLORS).map(([k, c]) =>
+    `<button type="button" class="swatch" data-color="${k}" aria-label="${c.name}" title="${c.name}" style="background:${c.l[0]}"></button>`).join("");
+
+  // ---------- Helpers for lists ----------
+  const list = (el, html, msg) => { el.innerHTML = html || `<li class="empty">${msg}</li>`; };
+  const appTile = (a, i, del) => `<a class="app" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener">
+      <span class="ico" aria-hidden="true">${esc(a.icon || "🔗")}</span><span>${esc(a.name)}</span>
+      ${del ? `<button type="button" class="x" data-del-app="${i}" aria-label="Remove ${esc(a.name)}">×</button>` : ""}</a>`;
+  const txItem = (x, del) => `<li>
+      <div class="grow"><div>${esc(x.desc)}</div><div class="sub">${esc(x.cat)} · ${esc(prettyDate(x.date))}</div></div>
+      <span class="amt ${x.type === "in" ? "good" : "bad"}">${x.type === "in" ? "+" : "−"}${money(x.amount)}</span>
+      ${del ? `<button type="button" class="x" data-del-tx="${x.id}" aria-label="Delete">×</button>` : ""}</li>`;
+
+  function dueTag(t) {
+    if (!t.due) return "";
+    const n = daysUntil(t.due);
+    if (t.done) return `<span class="due">${prettyDate(t.due)}</span>`;
+    if (n < 0) return `<span class="due late">Late</span>`;
+    if (n === 0) return `<span class="due soon">Today</span>`;
+    if (n === 1) return `<span class="due soon">Tomorrow</span>`;
+    if (n < 7) return `<span class="due">${parse(t.due).toLocaleDateString([], { weekday: "short" })}</span>`;
+    return `<span class="due">${prettyDate(t.due)}</span>`;
+  }
+  const todoItem = (t, del) => `<li class="${t.done ? "done" : ""}">
+      <input type="checkbox" class="check" data-toggle-todo="${t.id}" ${t.done ? "checked" : ""} aria-label="Done">
+      <div class="grow"><div>${esc(t.text)}</div><div class="sub">${esc(t.kind)}</div></div>
+      ${dueTag(t)}
+      ${del ? `<button type="button" class="x" data-del-todo="${t.id}" aria-label="Delete">×</button>` : ""}</li>`;
+  const openTodos = () => state.todos.filter((t) => !t.done).sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
+
+  function nextCharge(day) {
+    const now = parse(today());
+    const make = (y, m) => new Date(y, m, Math.min(day, new Date(y, m + 1, 0).getDate()));
+    let d = make(now.getFullYear(), now.getMonth());
+    if (d < now) d = make(now.getFullYear(), now.getMonth() + 1);
+    return iso(d);
+  }
+  const subsSorted = () => state.subs.map((s) => ({ ...s, next: nextCharge(s.day) })).sort((a, b) => a.next.localeCompare(b.next));
+  const whenText = (s) => { const n = daysUntil(s); return n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`; };
+  const subItem = (s, del) => `<li>
+      <div class="grow"><div>${esc(s.name)}</div><div class="sub">Charges ${prettyDate(s.next)} (${whenText(s.next)})</div></div>
+      <span class="amt">${money(s.price)}</span>
+      ${del ? `<button type="button" class="x" data-del-sub="${s.id}" aria-label="Delete">×</button>` : ""}</li>`;
+
+  function goalHtml(g, controls) {
+    const pct = Math.min(100, g.target ? (g.saved / g.target) * 100 : 0);
+    const won = g.saved >= g.target;
+    return `<div class="goal">
+      <div class="head"><h3>${esc(g.name)}</h3>
+        ${controls ? `<button type="button" class="x" data-del-goal="${g.id}" aria-label="Delete goal">×</button>` : ""}</div>
+      <div class="bar big ${won ? "won" : ""}">
+        <div class="lbl"><span class="nums"><b>${money(g.saved)}</b> of ${money(g.target)}</span><span class="nums ${won ? "good" : "muted"}">${won ? "Goal reached!" : Math.floor(pct) + "%"}</span></div>
+        <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+      </div>
+      ${won ? "" : `<div class="sub">${money(g.target - g.saved)} to go</div>`}
+      ${controls ? `<div class="row">
+        <input type="number" step="0.01" min="0.01" placeholder="$" inputmode="decimal" id="goal-amt-${g.id}" aria-label="Amount">
+        <button type="button" class="btn sm primary" data-goal-add="${g.id}" data-sign="1">Add</button>
+        <button type="button" class="btn sm" data-goal-add="${g.id}" data-sign="-1">Take out</button>
+      </div>` : ""}
+    </div>`;
+  }
+
+  // ---------- Clock ----------
+  function tick() {
+    const d = new Date();
+    $("#clock").textContent = d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + (innerWidth <= 720 ? "\n" : " · ") + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const h = d.getHours();
+    $("#greeting").textContent = `${h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"}, ${state.name || "Hunter"}`;
+  }
+
+  // ---------- Render ----------
+  let gameFilter = "all";
+  function render() {
+    applyColor();
+    let inc = 0, out = 0;
+    state.tx.forEach((x) => (x.type === "in" ? (inc += x.amount) : (out += x.amount)));
+    const sortedTx = [...state.tx].sort((a, b) => b.date.localeCompare(a.date));
+    const todos = openTodos();
+    const late = todos.filter((t) => t.due && daysUntil(t.due) <= 0).length;
+    const subs = subsSorted();
+    const subTotal = state.subs.reduce((s, x) => s + x.price, 0);
+    const hours = state.games.reduce((s, g) => s + g.hours, 0);
+
+    // Home
+    $("#s-bal").textContent = money(inc - out);
+    $("#s-todo").textContent = todos.length;
+    $("#s-todo-note").textContent = late ? `${late} due today or late` : "";
+    $("#s-subs").textContent = money(subTotal);
+    $("#s-hours").textContent = hours;
+    list($("#home-todo"), todos.slice(0, 4).map((t) => todoItem(t, false)).join(""), "All done! Nothing left to do.");
+    $("#home-goal").innerHTML = state.goals.length ? goalHtml(state.goals[0], false) :
+      `<p class="empty">Saving for something? Add a goal in Money, then Savings goals.</p>`;
+    list($("#home-subs"), subs.slice(0, 3).map((s) => subItem(s, false)).join(""), "No subscriptions added yet.");
+    $("#home-apps").innerHTML = state.apps.slice(0, 8).map((a, i) => appTile(a, i, false)).join("") || `<p class="empty">Add apps in More.</p>`;
+    list($("#home-tx"), sortedTx.slice(0, 4).map((x) => txItem(x, false)).join(""), "No transactions yet.");
+    $("#home-weather").innerHTML = state.city
+      ? `<div class="weather">${SUN}<div style="display:grid;gap:8px"><b>${esc(state.city)}</b>
+          <a class="btn sm primary" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent("weather " + state.city)}">See today's weather</a></div></div>`
+      : `<form id="home-city" class="row"><input id="home-city-input" placeholder="Your city, like Dallas, TX" required><button class="btn primary">Save</button></form>`;
+
+    // To-do
+    list($("#todo-list"), todos.map((t) => todoItem(t, true)).join(""), "Nothing to do. Add homework or chores above.");
+    const done = state.todos.filter((t) => t.done);
+    $("#done-card").hidden = !done.length;
+    list($("#done-list"), done.map((t) => todoItem(t, true)).join(""), "");
+
+    // Money
+    $("#m-in").textContent = money(inc);
+    $("#m-out").textContent = money(out);
+    $("#m-bal").textContent = money(inc - out);
+    list($("#tx-list"), sortedTx.map((x) => txItem(x, true)).join(""), "No transactions yet.");
+    const cats = {};
+    state.tx.filter((x) => x.type === "out").forEach((x) => (cats[x.cat] = (cats[x.cat] || 0) + x.amount));
+    const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    const cmax = entries[0]?.[1] || 1;
+    $("#cat-bars").innerHTML = entries.map(([c, v]) => `<div class="bar">
+        <div class="lbl"><span>${esc(c)}</span><span class="amt">${money(v)}</span></div>
+        <div class="track"><div class="fill" style="width:${(v / cmax) * 100}%"></div></div></div>`).join("") ||
+      `<p class="empty">Add something you spent money on to see it here.</p>`;
+    $("#goal-list").innerHTML = state.goals.map((g) => goalHtml(g, true)).join("") || `<p class="empty">No goals yet. What do you want to save up for?</p>`;
+    $("#sub-month").textContent = money(subTotal);
+    $("#sub-year").textContent = money(subTotal * 12);
+    $("#sub-next").textContent = subs[0] ? prettyDate(subs[0].next) : "None";
+    list($("#sub-list"), subs.map((s) => subItem(s, true)).join(""), "No subscriptions yet.");
+
+    // Games
+    const label = { playing: "Playing", wishlist: "Want it", done: "Beat it" };
+    const beaten = state.games.filter((g) => g.status === "done");
+    $("#g-hours").textContent = hours;
+    $("#g-playing").textContent = state.games.filter((g) => g.status === "playing").length;
+    $("#g-done").textContent = beaten.length;
+    const top = [...state.games].filter((g) => g.hours > 0).sort((a, b) => b.hours - a.hours).slice(0, 6);
+    const gmax = top[0]?.hours || 1;
+    $("#game-chart").innerHTML = top.map((g) => `<div class="bar">
+        <div class="lbl"><span>${esc(g.name)}</span><span class="amt">${g.hours} hr</span></div>
+        <div class="track"><div class="fill" style="width:${(g.hours / gmax) * 100}%"></div></div></div>`).join("") ||
+      `<p class="empty">Tap + on a game to add hours played.</p>`;
+    $("#shelf").innerHTML = beaten.map((g) => `<div class="trophy">${TROPHY}<span class="tn">${esc(g.name)}</span><span class="tsub">${g.beatOn ? "Beat " + prettyDate(g.beatOn) : esc(g.platform)}</span></div>`).join("") ||
+      `<p class="empty">Beat a game to put a trophy here.</p>`;
+    const games = state.games.filter((g) => gameFilter === "all" || g.status === gameFilter);
+    $("#game-list").innerHTML = games.map((g) => `<div class="game">
+        <div class="top"><span class="name">${esc(g.name)}</span><button type="button" class="x" data-del-game="${g.id}" aria-label="Remove ${esc(g.name)}">×</button></div>
+        <div class="row" style="gap:6px"><span class="pill ${g.status}">${label[g.status]}</span><span class="pill">${esc(g.platform)}</span></div>
+        <div class="bottom">
+          <select data-status-game="${g.id}" aria-label="Status">
+            ${Object.entries(label).map(([v, l]) => `<option value="${v}" ${g.status === v ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+          <div class="hours"><button type="button" class="btn sm" data-hour="${g.id}" data-d="-1" aria-label="Less time">−</button>
+            <span>${g.hours} hr</span>
+            <button type="button" class="btn sm" data-hour="${g.id}" data-d="1" aria-label="More time">+</button></div>
+        </div></div>`).join("") || `<p class="empty">No games here yet. Add one above.</p>`;
+
+    // Gmail
+    list($("#mail-list"), state.mail.map((m) => `<li>
+        <input type="checkbox" class="check" data-done-mail="${m.id}" aria-label="Mark done">
+        <div class="grow"><div>${esc(m.subject)}</div><div class="sub">From ${esc(m.from)} · added ${esc(prettyDate(m.date))}</div></div>
+        <a class="btn sm" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/${encodeURIComponent(m.from + " " + m.subject)}">Find</a></li>`).join(""),
+      "Nothing to answer right now.");
+
+    // More
+    $("#app-grid").innerHTML = state.apps.map((a, i) => appTile(a, i, true)).join("") || `<p class="empty">No apps yet. Add one below.</p>`;
+    document.querySelectorAll(".swatch").forEach((s) => s.setAttribute("aria-pressed", String(s.dataset.color === state.color)));
+    if (document.activeElement !== $("#name-input")) $("#name-input").value = state.name || "";
+    if (document.activeElement !== $("#city-input")) $("#city-input").value = state.city || "";
+    tick();
+  }
+
+  // ---------- Forms ----------
+  const on = (sel, fn) => $(sel).addEventListener("submit", (e) => { e.preventDefault(); fn(e); });
+  const flashSaved = () => { $("#saved-note").hidden = false; setTimeout(() => ($("#saved-note").hidden = true), 2000); };
+
+  on("#todo-form", (e) => {
+    state.todos.push({ id: uid(), text: $("#todo-text").value.trim(), kind: $("#todo-kind").value, due: $("#todo-due").value || "", done: false });
+    $("#todo-text").value = ""; $("#todo-due").value = ""; save();
+  });
+  on("#tx-form", () => {
+    const amount = round2(parseFloat($("#tx-amount").value));
+    if (!(amount > 0)) return;
+    state.tx.push({ id: uid(), type: $("#tx-type").value, desc: $("#tx-desc").value.trim(), amount, cat: $("#tx-cat").value, date: $("#tx-date").value || today() });
+    $("#tx-desc").value = ""; $("#tx-amount").value = ""; save();
+  });
+  $("#tx-date").value = today();
+  on("#goal-form", (e) => {
+    const target = round2(parseFloat($("#goal-target").value));
+    if (!(target > 0)) return;
+    state.goals.push({ id: uid(), name: $("#goal-name").value.trim(), target, saved: 0 });
+    e.target.reset(); save();
+  });
+  $("#sub-day").innerHTML = Array.from({ length: 31 }, (_, i) => {
+    const n = i + 1, sfx = n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th";
+    return `<option value="${n}" ${n === new Date().getDate() ? "selected" : ""}>Charges on the ${n}${sfx}</option>`;
+  }).join("");
+  on("#sub-form", () => {
+    const price = round2(parseFloat($("#sub-price").value));
+    if (!(price > 0)) return;
+    state.subs.push({ id: uid(), name: $("#sub-name").value.trim(), price, day: +$("#sub-day").value });
+    $("#sub-name").value = ""; $("#sub-price").value = ""; save();
+  });
+  on("#game-form", () => {
+    const status = $("#game-status").value;
+    state.games.unshift({ id: uid(), name: $("#game-name").value.trim(), platform: $("#game-platform").value, status, hours: 0, beatOn: status === "done" ? today() : "" });
+    $("#game-name").value = ""; save();
+  });
+  $("#mail-q").addEventListener("input", (e) => {
+    const q = e.target.value.trim();
+    $("#mail-go").href = "https://mail.google.com/mail/u/0/" + (q ? "#search/" + encodeURIComponent(q) : "#inbox");
+  });
+  on("#mail-form", (e) => {
+    state.mail.unshift({ id: uid(), from: $("#mail-from").value.trim(), subject: $("#mail-subject").value.trim(), date: today() });
+    e.target.reset(); save();
+  });
+  on("#app-form", (e) => {
+    state.apps.push({ icon: $("#app-icon").value.trim() || "🔗", name: $("#app-name").value.trim(), url: safeUrl($("#app-url").value) });
+    e.target.reset(); save();
+  });
+  on("#name-form", () => { state.name = $("#name-input").value.trim() || "Hunter"; $("#name-input").blur(); save(); flashSaved(); });
+  on("#city-form", () => { state.city = $("#city-input").value.trim(); $("#city-input").blur(); save(); flashSaved(); });
+  document.addEventListener("submit", (e) => {
+    if (e.target.id !== "home-city") return;
+    e.preventDefault();
+    state.city = $("#home-city-input").value.trim(); save();
+  });
+
+  $("#reset-btn").addEventListener("click", () => ($("#reset-confirm").hidden = false));
+  $("#reset-no").addEventListener("click", () => ($("#reset-confirm").hidden = true));
+  $("#reset-yes").addEventListener("click", () => { state = defaults(); $("#reset-confirm").hidden = true; save(); });
+  $("#clear-done").addEventListener("click", () => { state.todos = state.todos.filter((t) => !t.done); save(); });
+
+  // ---------- Clicks ----------
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("button"); if (!el) return;
+    const d = el.dataset;
+    if (d.tab) showTab(d.tab);
+    else if (d.gotoMoney) { showTab("money"); showMoney(d.gotoMoney); }
+    else if (d.m) showMoney(d.m);
+    else if (d.f) {
+      gameFilter = d.f;
+      document.querySelectorAll("#game-filter .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === el)));
+      render();
+    }
+    else if (d.color) { state.color = d.color; save(); }
+    else if (d.delApp !== undefined) { e.preventDefault(); state.apps.splice(+d.delApp, 1); save(); }
+    else if (d.delTx) { state.tx = state.tx.filter((x) => x.id !== d.delTx); save(); }
+    else if (d.delGame) { state.games = state.games.filter((g) => g.id !== d.delGame); save(); }
+    else if (d.delTodo) { state.todos = state.todos.filter((t) => t.id !== d.delTodo); save(); }
+    else if (d.delGoal) { state.goals = state.goals.filter((g) => g.id !== d.delGoal); save(); }
+    else if (d.delSub) { state.subs = state.subs.filter((s) => s.id !== d.delSub); save(); }
+    else if (d.hour) { const g = state.games.find((x) => x.id === d.hour); if (g) { g.hours = Math.max(0, g.hours + +d.d); save(); } }
+    else if (d.goalAdd) {
+      const g = state.goals.find((x) => x.id === d.goalAdd);
+      const amt = round2(parseFloat($("#goal-amt-" + d.goalAdd).value));
+      if (g && amt > 0) { g.saved = Math.max(0, round2(g.saved + amt * +d.sign)); save(); }
+    }
+  });
+  document.addEventListener("change", (e) => {
+    const d = e.target.dataset;
+    if (d.doneMail) { state.mail = state.mail.filter((m) => m.id !== d.doneMail); save(); }
+    else if (d.toggleTodo) { const t = state.todos.find((x) => x.id === d.toggleTodo); if (t) { t.done = e.target.checked; save(); } }
+    else if (d.statusGame) {
+      const g = state.games.find((x) => x.id === d.statusGame);
+      if (g) { g.status = e.target.value; if (g.status === "done" && !g.beatOn) g.beatOn = today(); save(); }
+    }
+  });
+
+  // ---------- Backup ----------
+  const note = (t) => { const n = $("#backup-note"); n.textContent = t; n.hidden = false; };
+  $("#export-btn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const file = new File([blob], `hunters-app-backup-${today()}.json`, { type: "application/json" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).then(() => note("Backup saved."), () => {});
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    note("Backup saved.");
+  });
+  $("#import-file").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { state = { ...defaults(), ...JSON.parse(await f.text()) }; save(); note("Backup restored."); }
+    catch (err) { note("That file isn't a Hunter's App backup."); }
+    e.target.value = "";
+  });
+
+  // ---------- Start ----------
+  let start = "home";
+  try { start = localStorage.getItem(KEY + "-tab") || "home"; } catch (e) {}
+  showTab(start);
+  render();
+  setInterval(tick, 30000);
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
 </body>
 </html>

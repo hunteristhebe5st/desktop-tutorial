@@ -1,20 +1,17 @@
 # Hunter's App
 
-My personal dashboard, all in one place:
+My personal app: to-dos and homework, money, savings goals, subscriptions, games, Gmail shortcuts and my favorite apps.
 
-- **🏠 Home** – balance, spending this month, emails to follow up and games I'm playing
-- **✉️ Gmail** – one-tap links to Inbox, Unread, Starred, Purchases, plus Gmail search and a follow-up list
-- **📱 Apps** – a launcher for my favorite apps and sites (add or remove your own)
-- **🎮 Games** – track games I'm playing, want, or beat, with hours played
-- **💳 Transactions** – log money in and out, see the balance and spending by category
-- **⚙️ Settings** – change your name, download or restore a backup
+## Install it on iPhone
 
-## How to use it
+1. Open **https://hunteristhebe5st.github.io/desktop-tutorial/** in Safari.
+2. Tap the Share button, then **Add to Home Screen**.
+3. Open it from the green **H** icon. It runs full screen and works offline.
 
-Open `index.html` in any browser. Everything saves in that browser automatically.
+Everything you add is saved on your phone. Use **More → Backup** to save a copy to Files.
 
-To use it on your phone, turn on GitHub Pages (repo **Settings → Pages → Deploy from branch**) and open the link it gives you.
+## Files
 
-## iPhone version
-
-`phone.html` is the phone-friendly version, published at https://claude.ai/artifact/KQQ4kVn76UEbEVSpz27TMW. Open it in Safari, tap Share, then **Add to Home Screen**.
+- `index.html` – the app
+- `manifest.webmanifest`, `icons/`, `sw.js` – make it installable and work offline
+- `phone.html` – the version that runs inside Claude (https://claude.ai/artifact/KQQ4kVn76UEbEVSpz27TMW)
