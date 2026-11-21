@@ -14,3 +14,7 @@ My personal dashboard, all in one place:
 Open `index.html` in any browser. Everything saves in that browser automatically.
 
 To use it on your phone, turn on GitHub Pages (repo **Settings → Pages → Deploy from branch**) and open the link it gives you.
+
+## iPhone version
+
+`phone.html` is the phone-friendly version, published at https://claude.ai/artifact/KQQ4kVn76UEbEVSpz27TMW. Open it in Safari, tap Share, then **Add to Home Screen**.
