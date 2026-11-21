@@ -8,501 +8,566 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hunter's App">
-<meta name="theme-color" content="#f3f5f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101511" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
 <style>
-/* Layout: app shell — header, one panel at a time, tab bar pinned to the bottom on phones, on top on wide screens. Default accent is hunter green; Settings can swap it. */
+/* Layout: native-iPhone shell — frosted nav bar with a large title per screen, inset grouped lists, widgets on Home, bottom sheets for adding, frosted tab bar. Accent is user-picked (hunter green by default). */
 :root {
-  --bg: #f3f5f2;
+  --bg: #f2f2f7;
   --card: #ffffff;
-  --fg: #1a211c;
-  --muted: #5f6b62;
-  --line: #dde3dc;
-  --accent: #355e3b;
+  --fg: #000000;
+  --muted: #6c6c70;
+  --faint: #c4c4c9;
+  --sep: rgba(60, 60, 67, .18);
+  --fill: rgba(118, 118, 128, .12);
+  --bar: rgba(249, 249, 249, .88);
+  --sheet-bg: #f2f2f7;
+  --sheet-card: #ffffff;
+  --shade: rgba(0, 0, 0, .32);
+  --good: #248a3d;
+  --bad: #d70015;
+  --gold: #b07d05;
+  --accent: #2f7d46;
+  --accent-soft: #e3f1e7;
   --accent-fg: #ffffff;
-  --accent-soft: #e4ede3;
-  --good: #1f7a3a;
-  --bad: #b4441b;
-  --gold: #a8740a;
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, sans-serif;
-  --r: 14px;
-  --nav-h: 62px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-num: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif;
+  --nav-h: 44px;
+  --tab-h: 50px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #101511; --card: #19201a; --fg: #e8eee7; --muted: #9aa79c; --line: #2a342c;
-    --accent: #7fbf8a; --accent-fg: #0e1a10; --accent-soft: #233328; --good: #6fd68c; --bad: #f29a6b; --gold: #f0c24f;
+    --bg: #000000; --card: #1c1c1e; --fg: #ffffff; --muted: #98989f; --faint: #48484a;
+    --sep: rgba(84, 84, 88, .6); --fill: rgba(118, 118, 128, .24); --bar: rgba(22, 22, 24, .86);
+    --sheet-bg: #1c1c1e; --sheet-card: #2c2c2e; --shade: rgba(0, 0, 0, .55);
+    --good: #30d158; --bad: #ff453a; --gold: #ffd60a;
+    --accent: #4cd07d; --accent-soft: #1c3324; --accent-fg: #04210f;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #101511; --card: #19201a; --fg: #e8eee7; --muted: #9aa79c; --line: #2a342c;
-  --accent: #7fbf8a; --accent-fg: #0e1a10; --accent-soft: #233328; --good: #6fd68c; --bad: #f29a6b; --gold: #f0c24f;
+  --bg: #000000; --card: #1c1c1e; --fg: #ffffff; --muted: #98989f; --faint: #48484a;
+  --sep: rgba(84, 84, 88, .6); --fill: rgba(118, 118, 128, .24); --bar: rgba(22, 22, 24, .86);
+  --sheet-bg: #1c1c1e; --sheet-card: #2c2c2e; --shade: rgba(0, 0, 0, .55);
+  --good: #30d158; --bad: #ff453a; --gold: #ffd60a;
+  --accent: #4cd07d; --accent-soft: #1c3324; --accent-fg: #04210f;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html { padding-top: env(safe-area-inset-top, 0px); }
-body { margin: 0; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
 [hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px;
-  -webkit-tap-highlight-color: transparent;
+  margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.3 var(--font);
+  -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
+  touch-action: manipulation; overscroll-behavior-y: none;
 }
-h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
-h1 { font-size: 1.35rem; }
-h2 { font-size: 1.02rem; font-weight: 700; }
-h3 { font-size: .95rem; font-weight: 600; }
-p { margin: 0; }
-.muted { color: var(--muted); }
-.wrap {
-  max-width: 1040px; margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+button, input, select { font: inherit; color: inherit; }
+button { -webkit-user-select: none; user-select: none; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p { margin: 0; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Status-bar band + nav bar */
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30;
+  background: var(--bg);
 }
-
-header.top { padding-block: 16px 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.brand { display: flex; gap: 12px; align-items: center; min-width: 0; }
-.logo {
-  flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--accent); color: var(--accent-fg);
-  display: grid; place-items: center; font: 700 1.35rem var(--font-display);
+body.scrolled::before { background: var(--bar); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.navbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; height: var(--nav-h);
+  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  background: var(--bg); border-bottom: .5px solid transparent;
+  transition: background .2s, border-color .2s;
 }
-#greeting { margin: 2px 0 0; font-size: .9rem; }
-.clock { text-align: right; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.sync { font-size: .75rem; }
-
-nav.tabs { display: flex; gap: 6px; }
-nav.tabs button {
-  font: 500 .9rem var(--font-body); color: var(--fg); background: var(--card);
-  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
+body.scrolled .navbar { background: var(--bar); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-bottom-color: var(--sep); }
+.nav-title { font-weight: 600; font-size: 17px; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+body.scrolled .nav-title { opacity: 1; }
+.nav-btn {
+  justify-self: end; width: 44px; height: 44px; border: 0; background: none; color: var(--accent);
+  display: grid; place-items: center; cursor: pointer; border-radius: 22px;
 }
-nav.tabs button svg { width: 18px; height: 18px; }
-nav.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-nav.tabs-top { padding-block: 4px 12px; overflow-x: auto; }
+.nav-btn svg { width: 26px; height: 26px; }
+.nav-btn:active { opacity: .4; }
 
-main { padding-block: 4px 32px; }
-.panel { display: grid; gap: 14px; }
-.sub-panel { display: grid; gap: 14px; }
+/* Screens */
+main {
+  max-width: 680px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 calc(var(--tab-h) + 32px + env(safe-area-inset-bottom, 0px));
+}
+.screen { display: grid; gap: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .screen { animation: fadein .22s ease-out; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+.eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); margin-top: 2px; }
+.large-title { font-size: 34px; font-weight: 700; letter-spacing: .01em; line-height: 1.15; margin-bottom: 8px; text-wrap: balance; }
+.section-h {
+  font-size: 13px; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; color: var(--muted);
+  padding: 18px 16px 2px; display: flex; justify-content: space-between; align-items: baseline;
+}
+.section-h button { text-transform: none; font-size: 15px; letter-spacing: 0; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.section-h.big { font-size: 22px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--fg); padding: 18px 0 4px; }
+.foot { font-size: 13px; color: var(--muted); padding: 2px 16px 0; }
 
-.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; align-content: start; }
-.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.card-head a, .linkish { font-size: .85rem; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; text-decoration: none; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.stats.three { grid-template-columns: repeat(3, 1fr); }
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
-.stat .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.stat .value { font: 700 1.4rem var(--font-display); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.stat .note { font-size: .78rem; color: var(--muted); }
+/* Inset grouped list */
+.group { list-style: none; margin: 0; padding: 0; background: var(--card); border-radius: 12px; overflow: hidden; }
+.group > li { position: relative; }
+.cell {
+  display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 16px;
+  background: var(--card); width: 100%; border: 0; text-align: left; cursor: default;
+}
+button.cell, a.cell { cursor: pointer; }
+button.cell:active, a.cell:active { background: var(--fill); }
+.group > li:not(:last-child) .cell::after {
+  content: ""; position: absolute; left: var(--inset, 16px); right: 0; bottom: 0; height: .5px; background: var(--sep);
+}
+.group.icons > li { --inset: 60px; }
+.cell .main { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cell .t { font-size: 16px; display: block; }
+.cell .s { font-size: 13px; color: var(--muted); margin-top: 1px; display: block; }
+.cell .v { color: var(--muted); font-size: 16px; white-space: nowrap; }
+.cell .amt { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chev { width: 8px; height: 14px; color: var(--faint); flex: none; }
+.empty-cell { padding: 14px 16px; color: var(--muted); font-size: 15px; }
 .good { color: var(--good); } .bad { color: var(--bad); }
-
-.row { display: flex; gap: 8px; flex-wrap: wrap; }
-input, select {
-  font: 16px var(--font-body); color: var(--fg); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; flex: 1 1 150px; min-width: 0;
+.section-h.bad { color: var(--bad); }
+.tile {
+  width: 32px; height: 32px; border-radius: 8px; flex: none; display: grid; place-items: center;
+  font-size: 17px; color: #fff; font-weight: 600;
 }
-input.short, select.short { flex: 0 1 120px; }
-input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn {
-  font: 500 .92rem var(--font-body); color: var(--fg); background: var(--accent-soft);
-  border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; cursor: pointer;
-  text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+.tile svg { width: 19px; height: 19px; }
+.tile.round { border-radius: 50%; }
+.tile.soft { background: var(--fill); }
+
+/* Swipe to delete */
+.swipe { touch-action: pan-y; }
+.swipe .cell { transition: transform .25s cubic-bezier(.2, .8, .2, 1); position: relative; z-index: 1; }
+.swipe .cell.open { transform: translateX(-88px); }
+.del-btn {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 88px; border: 0; background: var(--bad); color: #fff;
+  font-weight: 500; cursor: pointer;
 }
-.btn.primary { background: var(--accent); color: var(--accent-fg); }
-.btn.danger { color: var(--bad); background: transparent; border-color: var(--line); }
-.btn.sm { padding: 5px 12px; font-size: .85rem; }
-.links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
-.list { list-style: none; margin: 0; padding: 0; }
-.list li { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
-.list li:last-child { border-bottom: 0; }
-.list .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.list li.done .grow > div:first-child { text-decoration: line-through; color: var(--muted); }
-.sub { color: var(--muted); font-size: .8rem; margin-top: 2px; }
-.amt { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.empty { color: var(--muted); font-size: .9rem; padding: 4px 0; }
-.x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1.25rem; line-height: 1; padding: 6px; }
-.check { width: 22px; height: 22px; flex: none; accent-color: var(--accent); margin: 0; }
-.due { font-size: .72rem; padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--muted); white-space: nowrap; }
-.due.late { background: var(--bad); color: var(--card); }
-.due.soon { background: var(--accent); color: var(--accent-fg); }
-
-.apps { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
-.app {
-  position: relative; display: grid; justify-items: center; gap: 6px; padding: 14px 4px 10px;
-  border-radius: 14px; background: var(--accent-soft); color: var(--fg); text-decoration: none; font-size: .82rem; text-align: center;
+/* Round checkbox */
+.tick {
+  width: 24px; height: 24px; flex: none; border-radius: 50%; border: 1.5px solid var(--faint); background: none;
+  display: grid; place-items: center; cursor: pointer; padding: 0; color: transparent;
 }
-.app .ico { font-size: 1.8rem; line-height: 1; }
-.app .x { position: absolute; top: 0; right: 0; font-size: 1rem; }
+.tick svg { width: 14px; height: 14px; }
+.tick.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.done-row .t { color: var(--muted); text-decoration: line-through; }
+.due { color: var(--muted); }
+.due.late { color: var(--bad); }
+.due.today { color: var(--accent); font-weight: 500; }
 
-.chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { font: 500 .85rem var(--font-body); color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-
-.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
-.game { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; }
-.game .top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
-.game .name { font-weight: 600; overflow-wrap: anywhere; }
-.pill { font-size: .72rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--muted); }
-.pill.playing { background: var(--accent); color: var(--accent-fg); }
-.game .bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.hours { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.game select { flex: none; padding: 6px 8px; font-size: 14px; }
-
-.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-.trophy { display: grid; justify-items: center; gap: 4px; text-align: center; padding: 14px 8px 12px; border-radius: 12px; background: var(--accent-soft); }
-.trophy svg { width: 34px; height: 34px; color: var(--gold); }
-.trophy .tn { font-weight: 600; font-size: .85rem; overflow-wrap: anywhere; }
-.trophy .tsub { font-size: .72rem; color: var(--muted); }
-
-.bars { display: grid; gap: 10px; }
-.bar { display: grid; gap: 4px; }
-.bar .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; }
-.bar .lbl span:first-child { min-width: 0; overflow-wrap: anywhere; }
-.bar .track { height: 10px; background: var(--accent-soft); border-radius: 999px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--accent); border-radius: 999px; }
-.bar.big .track { height: 14px; }
-.bar.won .fill { background: var(--good); }
-
-.goal { display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-.goal:last-child { border-bottom: 0; }
-.goal .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.goal .nums { font-variant-numeric: tabular-nums; font-size: .9rem; }
-.goal .row input { flex: 1 1 90px; padding: 7px 10px; }
-
-.weather { display: flex; align-items: center; gap: 14px; }
-.weather svg { width: 42px; height: 42px; color: var(--gold); flex: none; }
-
-.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
-.swatch {
-  width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--card); cursor: pointer;
-  box-shadow: 0 0 0 1px var(--line);
+/* Widgets */
+.widgets { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.widget {
+  background: var(--card); border-radius: 20px; padding: 14px 16px; border: 0; text-align: left;
+  display: grid; gap: 4px; align-content: start; min-height: 116px; cursor: pointer; min-width: 0;
+  transition: transform .15s;
 }
-.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--fg); }
+.widget:active { transform: scale(.97); }
+.widget .wl { font-size: 13px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.widget .wl svg { width: 15px; height: 15px; color: var(--accent); }
+.widget .wv { font-family: var(--font-num); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
+.widget .ws { font-size: 13px; color: var(--muted); }
+.widget.wide { grid-column: span 2; min-height: 0; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.ring { width: 64px; height: 64px; flex: none; }
+.ring .bgc { stroke: var(--fill); }
+.ring .fg { stroke: var(--accent); transition: stroke-dashoffset .5s; }
+.ring.won .fg { stroke: var(--good); }
+.ring text { fill: var(--fg); font: 600 14px var(--font-num); }
 
-.notice { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: .9rem; display: grid; gap: 6px; }
-.confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-nav.tabs-bottom { display: none; }
-@media (max-width: 720px) {
-  nav.tabs-top { display: none; }
-  nav.tabs-bottom {
-    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-    background: var(--card); border-top: 1px solid var(--line);
-    padding: 6px max(4px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
-    justify-content: space-around; gap: 0;
-  }
-  nav.tabs-bottom button {
-    flex: 1; flex-direction: column; gap: 2px; border: 0; background: none; border-radius: 10px;
-    font-size: .66rem; padding: 6px 0; color: var(--muted); min-width: 0;
-  }
-  nav.tabs-bottom button[aria-selected="true"] { background: none; color: var(--accent); }
-  nav.tabs-bottom button svg { width: 22px; height: 22px; }
-  main { padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px)); }
-  .grid2 { grid-template-columns: 1fr; }
-  .clock #clock { white-space: pre-line; }
-  .stats { grid-template-columns: 1fr 1fr; }
-  .stats.three { grid-template-columns: 1fr 1fr 1fr; }
-  .stats.three .stat .value { font-size: 1.05rem; }
-  .links { grid-template-columns: 1fr 1fr; }
+/* Springboard icons */
+.springboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; padding: 14px 8px; background: var(--card); border-radius: 20px; }
+.app { display: grid; justify-items: center; gap: 5px; font-size: 11.5px; text-align: center; position: relative; min-width: 0; }
+.app .icon {
+  width: 60px; height: 60px; border-radius: 14px; display: grid; place-items: center; font-size: 30px;
+  box-shadow: inset 0 0 0 .5px rgba(0,0,0,.08); transition: transform .15s;
 }
-@media (prefers-reduced-motion: no-preference) { .btn, .chip, nav.tabs button, .bar .fill { transition: background .15s, color .15s, width .3s; } }
+.app:active .icon { transform: scale(.92); }
+.app .name { max-width: 72px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app .minus {
+  position: absolute; top: -6px; left: calc(50% - 38px); width: 22px; height: 22px; border-radius: 50%;
+  border: 0; background: var(--faint); color: var(--fg); font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+}
+.editing .app .icon { animation: jiggle .3s infinite alternate; }
+@keyframes jiggle { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
+@media (prefers-reduced-motion: reduce) { .editing .app .icon { animation: none; } }
+
+/* Segmented control */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--fill); border-radius: 9px; padding: 2px; gap: 2px; }
+.seg button, .seg label {
+  border: 0; background: none; border-radius: 7px; padding: 6px 4px; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.seg [aria-pressed="true"], .seg input:checked + span {
+  background: var(--card); box-shadow: 0 2px 6px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04);
+}
+.seg label { padding: 0; display: grid; }
+.seg label span { padding: 6px 4px; border-radius: 7px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.sheet .seg [aria-pressed="true"], .sheet .seg input:checked + span { background: var(--sheet-card); }
+
+/* Stats strip */
+.strip { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--card); border-radius: 12px; }
+.strip > div { padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.strip > div + div { border-left: .5px solid var(--sep); }
+.strip .sl { font-size: 12px; color: var(--muted); }
+.strip .sv { font: 700 20px var(--font-num); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+/* Bars */
+.bars { background: var(--card); border-radius: 12px; padding: 14px 16px; display: grid; gap: 12px; }
+.bar { display: grid; gap: 5px; }
+.bar .bl { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.bar .bl span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.bar .track { height: 8px; background: var(--fill); border-radius: 4px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width .4s; }
+
+/* Big balance card */
+.hero-card { background: var(--card); border-radius: 20px; padding: 18px; display: grid; gap: 10px; }
+.hero-card .hv { font: 700 40px var(--font-num); font-variant-numeric: tabular-nums; line-height: 1.05; }
+.hero-card .hrow { display: flex; gap: 18px; font-size: 14px; color: var(--muted); }
+.hero-card .hrow b { font-family: var(--font-num); font-weight: 600; }
+
+/* Goals */
+.goal-card { background: var(--card); border-radius: 16px; padding: 14px 16px; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; border: 0; text-align: left; cursor: pointer; width: 100%; }
+.goal-card:active { background: var(--fill); }
+.goal-card .gn { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
+.goal-card .ga { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.goal-list { display: grid; gap: 10px; }
+
+/* Trophy shelf */
+.shelf { display: flex; gap: 10px; overflow-x: auto; padding: 2px 0 6px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.shelf::-webkit-scrollbar { display: none; }
+.trophy { flex: none; width: 116px; scroll-snap-align: start; background: var(--card); border-radius: 16px; padding: 14px 10px; display: grid; justify-items: center; gap: 4px; text-align: center; }
+.trophy svg { width: 36px; height: 36px; color: var(--gold); }
+.trophy .tn { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.trophy .ts { font-size: 12px; color: var(--muted); }
+
+/* Search field */
+.search { display: flex; gap: 8px; align-items: center; }
+.search label { flex: 1; display: flex; align-items: center; gap: 6px; background: var(--fill); border-radius: 10px; padding: 0 10px; min-width: 0; }
+.search svg { width: 16px; height: 16px; color: var(--muted); flex: none; }
+.search input { border: 0; background: none; padding: 9px 0; flex: 1; min-width: 0; font-size: 16px; outline: none; }
+.search a { color: var(--accent); font-size: 16px; padding: 6px 2px; }
+
+.notice { background: var(--card); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; font-size: 15px; }
+.notice b { font-size: 16px; }
+.notice p { color: var(--muted); }
+
+/* Profile + swatches */
+.profile { display: flex; align-items: center; gap: 14px; padding: 12px 16px; }
+.avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font: 600 26px var(--font-num); flex: none; }
+.swatches { display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; box-shadow: 0 0 0 2px var(--card), 0 0 0 0 var(--fg); transition: box-shadow .15s; }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--fg); }
+.red-text { color: var(--bad); }
+.center { justify-content: center; }
+
+/* Tab bar */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  background: var(--bar); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border-top: .5px solid var(--sep);
+  padding: 0 max(4px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(4px, env(safe-area-inset-left, 0px));
+}
+.tabbar .tabs { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--tab-h); }
+.tabbar button {
+  border: 0; background: none; color: var(--muted); display: grid; justify-items: center; align-content: center; gap: 2px;
+  font-size: 10px; font-weight: 500; cursor: pointer; position: relative; padding: 0;
+}
+.tabbar button svg { width: 25px; height: 25px; }
+.tabbar button[aria-selected="true"] { color: var(--accent); }
+.badge {
+  position: absolute; top: 3px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
+  background: var(--bad); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center;
+}
+
+/* Bottom sheet */
+.sheet-wrap { position: fixed; inset: 0; z-index: 50; }
+.shade { position: absolute; inset: 0; background: var(--shade); opacity: 0; transition: opacity .3s; }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; max-width: 680px; margin: 0 auto;
+  background: var(--sheet-bg); border-radius: 14px 14px 0 0; max-height: calc(100% - env(safe-area-inset-top, 0px) - 24px);
+  display: grid; grid-template-rows: auto 1fr; transform: translateY(100%); transition: transform .35s cubic-bezier(.2, .9, .25, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.sheet-wrap.open .shade { opacity: 1; }
+.sheet-wrap.open .sheet { transform: none; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--faint); margin: 6px auto 0; }
+.sheet-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 4px 8px 6px; }
+.sheet-head b { font-size: 17px; font-weight: 600; text-align: center; }
+.sheet-head button { border: 0; background: none; color: var(--accent); font-size: 17px; padding: 10px 8px; cursor: pointer; }
+.sheet-head .done { justify-self: end; font-weight: 600; }
+.sheet-head .cancel { justify-self: start; }
+.sheet-body {
+  overflow-y: auto; display: grid; gap: 18px; align-content: start;
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px));
+}
+.sheet .group, .sheet .cell { background: var(--sheet-card); }
+.field { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; }
+.field > span { width: 96px; flex: none; font-size: 16px; }
+.field input, .field select {
+  flex: 1; min-width: 0; border: 0; background: none; font-size: 16px; padding: 12px 0; outline: none; text-align: right;
+  -webkit-appearance: none; appearance: none;
+}
+.field input.left { text-align: left; }
+.field select { direction: rtl; color: var(--muted); }
+.field input[type="date"] { color: var(--muted); }
+.sheet .group > li:not(:last-child) .field { border-bottom: .5px solid var(--sep); }
+.big-btn {
+  width: 100%; border: 0; border-radius: 12px; padding: 15px; font-size: 17px; font-weight: 600; cursor: pointer;
+  background: var(--sheet-card); color: var(--accent);
+}
+.big-btn.primary { background: var(--accent); color: var(--accent-fg); }
+.big-btn.danger { color: var(--bad); }
+.big-btn:active { opacity: .7; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 22px; padding: 14px; background: var(--sheet-card); border-radius: 12px; }
+.stepper button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--fill); font-size: 26px; cursor: pointer; color: var(--accent); }
+.stepper .sv { font: 700 38px var(--font-num); min-width: 84px; text-align: center; }
+.stepper .su { font-size: 13px; color: var(--muted); display: block; font-weight: 400; font-family: var(--font); }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 60; transform: translate(-50%, -20px);
+  background: var(--card); color: var(--fg); padding: 10px 18px; border-radius: 22px; font-size: 15px; font-weight: 500;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.toast svg { width: 18px; height: 18px; color: var(--good); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 560px) {
+  .widgets { grid-template-columns: repeat(3, 1fr); }
+  .widget.wide { grid-column: span 3; }
+  .springboard { grid-template-columns: repeat(6, 1fr); }
+}
 </style>
 <style id="accent-style"></style>
 </head>
 <body>
 
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="logo" aria-hidden="true">H</div>
-      <div>
-        <h1>Hunter's App</h1>
-        <p id="greeting" class="muted">Welcome back</p>
-      </div>
-    </div>
-    <div class="clock"><div id="clock"></div><div id="sync" class="sync">Saved on this device</div></div>
-  </header>
-  <nav class="tabs tabs-top" id="tabs-top" aria-label="Sections"></nav>
-</div>
+<header class="navbar">
+  <span></span>
+  <span class="nav-title" id="nav-title">Home</span>
+  <button type="button" class="nav-btn" id="nav-add" aria-label="Add">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</header>
 
-<main class="wrap">
+<main>
   <!-- HOME -->
-  <section id="home" class="panel">
-    <div class="stats">
-      <div class="stat"><span class="label">Balance</span><span id="s-bal" class="value">$0.00</span></div>
-      <div class="stat"><span class="label">To-dos left</span><span id="s-todo" class="value">0</span><span id="s-todo-note" class="note"></span></div>
-      <div class="stat"><span class="label">Bills a month</span><span id="s-subs" class="value">$0.00</span></div>
-      <div class="stat"><span class="label">Hours played</span><span id="s-hours" class="value">0</span></div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-head"><h2>Up next</h2><button class="linkish" data-tab="todo">See all</button></div>
-        <ul id="home-todo" class="list"></ul>
-      </div>
-      <div class="card">
-        <div class="card-head"><h2>Weather</h2><button class="linkish" data-tab="more">Change city</button></div>
-        <div id="home-weather"></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><h2>Saving up</h2><button class="linkish" data-goto-money="goals">See all</button></div>
-        <div id="home-goal"></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><h2>Bills coming up</h2><button class="linkish" data-goto-money="subs">See all</button></div>
-        <ul id="home-subs" class="list"></ul>
-      </div>
-      <div class="card"><h2>Quick launch</h2><div id="home-apps" class="apps"></div></div>
-      <div class="card">
-        <div class="card-head"><h2>Recent transactions</h2><button class="linkish" data-goto-money="tx">See all</button></div>
-        <ul id="home-tx" class="list"></ul>
-      </div>
-    </div>
+  <section id="home" class="screen">
+    <div class="eyebrow" id="home-date"></div>
+    <h1 class="large-title" id="home-title">Hi, Hunter</h1>
+    <div class="widgets" id="widgets"></div>
+    <h2 class="section-h">Up next <button type="button" data-go="todo">See all</button></h2>
+    <ul class="group" id="home-todo"></ul>
+    <h2 class="section-h">Apps <button type="button" data-go="more">Edit</button></h2>
+    <div class="springboard" id="home-apps"></div>
+    <h2 class="section-h">Recent activity <button type="button" data-go="money:tx">See all</button></h2>
+    <ul class="group icons" id="home-tx"></ul>
   </section>
 
   <!-- TO-DO -->
-  <section id="todo" class="panel" hidden>
-    <div class="card">
-      <h2>Add a to-do</h2>
-      <form id="todo-form" class="row">
-        <input id="todo-text" placeholder="What do you need to do?" required>
-        <select id="todo-kind" class="short"><option>Homework</option><option>Chore</option><option>Test</option><option>Other</option></select>
-        <input id="todo-due" type="date" class="short" aria-label="Due date">
-        <button class="btn primary">Add</button>
-      </form>
-    </div>
-    <div class="card">
-      <h2>To do</h2>
-      <ul id="todo-list" class="list"></ul>
-    </div>
-    <div class="card" id="done-card">
-      <div class="card-head"><h2>Finished</h2><button class="linkish" id="clear-done">Clear finished</button></div>
-      <ul id="done-list" class="list"></ul>
-    </div>
+  <section id="todo" class="screen" hidden>
+    <h1 class="large-title">To-do</h1>
+    <div id="todo-groups" class="screen" style="animation:none"></div>
   </section>
 
   <!-- MONEY -->
-  <section id="money" class="panel" hidden>
-    <div class="stats three">
-      <div class="stat"><span class="label">Money in</span><span id="m-in" class="value good">$0.00</span></div>
-      <div class="stat"><span class="label">Money out</span><span id="m-out" class="value bad">$0.00</span></div>
-      <div class="stat"><span class="label">Balance</span><span id="m-bal" class="value">$0.00</span></div>
+  <section id="money" class="screen" hidden>
+    <h1 class="large-title">Money</h1>
+    <div class="seg" id="money-seg">
+      <button type="button" data-m="tx" aria-pressed="true">Activity</button>
+      <button type="button" data-m="goals" aria-pressed="false">Goals</button>
+      <button type="button" data-m="subs" aria-pressed="false">Bills</button>
     </div>
-    <div class="chips" id="money-tabs">
-      <button class="chip" data-m="tx" aria-pressed="true">Transactions</button>
-      <button class="chip" data-m="goals" aria-pressed="false">Savings goals</button>
-      <button class="chip" data-m="subs" aria-pressed="false">Subscriptions</button>
+    <div data-mpanel="tx" class="screen" style="animation:none">
+      <div class="hero-card" style="margin-top:8px">
+        <span class="eyebrow" style="margin:0">Balance</span>
+        <span class="hv" id="m-bal">$0.00</span>
+        <div class="hrow"><span>In <b class="good" id="m-in">$0.00</b></span><span>Out <b class="bad" id="m-out">$0.00</b></span></div>
+      </div>
+      <h2 class="section-h">Where it goes</h2>
+      <div class="bars" id="cat-bars"></div>
+      <h2 class="section-h">Transactions</h2>
+      <ul class="group icons" id="tx-list"></ul>
+      <p class="foot">Swipe left on a transaction to delete it.</p>
     </div>
-
-    <div class="sub-panel" data-mpanel="tx">
-      <div class="card">
-        <h2>Add a transaction</h2>
-        <form id="tx-form" class="row">
-          <select id="tx-type" class="short"><option value="out">I spent</option><option value="in">I got</option></select>
-          <input id="tx-desc" placeholder="What for?" required>
-          <input id="tx-amount" type="number" step="0.01" min="0.01" placeholder="$0.00" required inputmode="decimal" class="short">
-          <select id="tx-cat">
-            <option>Food</option><option>Games</option><option>Shopping</option><option>Subscriptions</option>
-            <option>Transport</option><option>Allowance</option><option>Job</option><option>Gift</option><option>Other</option>
-          </select>
-          <input id="tx-date" type="date" required aria-label="Date">
-          <button class="btn primary">Add</button>
-        </form>
-      </div>
-      <div class="grid2">
-        <div class="card"><h2>Where my money goes</h2><div id="cat-bars" class="bars"></div></div>
-        <div class="card"><h2>All transactions</h2><ul id="tx-list" class="list"></ul></div>
-      </div>
+    <div data-mpanel="goals" class="screen" style="animation:none" hidden>
+      <div class="goal-list" id="goal-list" style="margin-top:8px"></div>
+      <p class="foot">Tap a goal to add or take out money.</p>
     </div>
-
-    <div class="sub-panel" data-mpanel="goals" hidden>
-      <div class="card">
-        <h2>New savings goal</h2>
-        <form id="goal-form" class="row">
-          <input id="goal-name" placeholder="What are you saving for?" required>
-          <input id="goal-target" type="number" step="0.01" min="1" placeholder="Goal $" required inputmode="decimal" class="short">
-          <button class="btn primary">Add</button>
-        </form>
+    <div data-mpanel="subs" class="screen" style="animation:none" hidden>
+      <div class="strip" style="margin-top:8px">
+        <div><span class="sl">Per month</span><span class="sv" id="sub-month">$0</span></div>
+        <div><span class="sl">Per year</span><span class="sv" id="sub-year">$0</span></div>
+        <div><span class="sl">Next</span><span class="sv" id="sub-next">None</span></div>
       </div>
-      <div class="card">
-        <h2>My goals</h2>
-        <div id="goal-list"></div>
-      </div>
-    </div>
-
-    <div class="sub-panel" data-mpanel="subs" hidden>
-      <div class="stats three">
-        <div class="stat"><span class="label">Per month</span><span id="sub-month" class="value">$0.00</span></div>
-        <div class="stat"><span class="label">Per year</span><span id="sub-year" class="value">$0.00</span></div>
-        <div class="stat"><span class="label">Next charge</span><span id="sub-next" class="value">None</span></div>
-      </div>
-      <div class="card">
-        <h2>Add a subscription</h2>
-        <form id="sub-form" class="row">
-          <input id="sub-name" placeholder="Like Game Pass or Spotify" required>
-          <input id="sub-price" type="number" step="0.01" min="0.01" placeholder="$ a month" required inputmode="decimal" class="short">
-          <select id="sub-day" class="short" aria-label="Day it charges"></select>
-          <button class="btn primary">Add</button>
-        </form>
-      </div>
-      <div class="card">
-        <h2>My subscriptions</h2>
-        <ul id="sub-list" class="list"></ul>
-      </div>
+      <h2 class="section-h">Subscriptions</h2>
+      <ul class="group icons" id="sub-list"></ul>
+      <p class="foot">Swipe left on a bill to delete it.</p>
     </div>
   </section>
 
   <!-- GAMES -->
-  <section id="games" class="panel" hidden>
-    <div class="stats three">
-      <div class="stat"><span class="label">Hours played</span><span id="g-hours" class="value">0</span></div>
-      <div class="stat"><span class="label">Playing now</span><span id="g-playing" class="value">0</span></div>
-      <div class="stat"><span class="label">Trophies</span><span id="g-done" class="value">0</span></div>
+  <section id="games" class="screen" hidden>
+    <h1 class="large-title">Games</h1>
+    <div class="strip">
+      <div><span class="sl">Hours played</span><span class="sv" id="g-hours">0</span></div>
+      <div><span class="sl">Playing</span><span class="sv" id="g-playing">0</span></div>
+      <div><span class="sl">Trophies</span><span class="sv" id="g-done">0</span></div>
     </div>
-    <div class="card">
-      <h2>Add a game</h2>
-      <form id="game-form" class="row">
-        <input id="game-name" placeholder="Game name" required>
-        <select id="game-platform" class="short">
-          <option>PC</option><option>PlayStation</option><option>Xbox</option><option>Switch</option>
-          <option>iPhone</option><option>Roblox</option><option>Other</option>
-        </select>
-        <select id="game-status" class="short">
-          <option value="playing">Playing</option><option value="wishlist">Want it</option><option value="done">Beat it</option>
-        </select>
-        <button class="btn primary">Add</button>
-      </form>
+    <div id="trophy-wrap">
+      <h2 class="section-h big">Trophy shelf</h2>
+      <div class="shelf" id="shelf"></div>
     </div>
-    <div class="grid2">
-      <div class="card"><h2>Most played</h2><div id="game-chart" class="bars"></div></div>
-      <div class="card"><h2>Trophy shelf</h2><div id="shelf" class="shelf"></div></div>
+    <div id="chart-wrap">
+      <h2 class="section-h">Most played</h2>
+      <div class="bars" id="game-chart"></div>
     </div>
-    <div class="chips" id="game-filter">
-      <button class="chip" data-f="all" aria-pressed="true">All</button>
-      <button class="chip" data-f="playing" aria-pressed="false">Playing</button>
-      <button class="chip" data-f="wishlist" aria-pressed="false">Want it</button>
-      <button class="chip" data-f="done" aria-pressed="false">Beat it</button>
+    <h2 class="section-h">My games</h2>
+    <div class="seg" id="game-seg">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="playing" aria-pressed="false">Playing</button>
+      <button type="button" data-f="wishlist" aria-pressed="false">Want it</button>
+      <button type="button" data-f="done" aria-pressed="false">Beat it</button>
     </div>
-    <div id="game-list" class="games"></div>
+    <ul class="group icons" id="game-list" style="margin-top:8px"></ul>
+    <p class="foot">Tap a game to log hours or change its status.</p>
   </section>
 
   <!-- GMAIL -->
-  <section id="gmail" class="panel" hidden>
-    <div class="card">
-      <h2>Open Gmail</h2>
-      <div class="links">
-        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">Inbox</a>
-        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/is%3Aunread">Unread</a>
-        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#starred">Starred</a>
-        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Apurchases">Purchases</a>
-        <a class="btn" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/category%3Aupdates">Updates</a>
-        <a class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox?compose=new">Write email</a>
-      </div>
-      <div class="row">
-        <input id="mail-q" placeholder="Search Gmail, like: from:amazon" autocomplete="off">
-        <a id="mail-go" class="btn primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">Search</a>
-      </div>
+  <section id="gmail" class="screen" hidden>
+    <h1 class="large-title">Mail</h1>
+    <div class="search">
+      <label for="mail-q">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="mail-q" type="search" placeholder="Search Gmail" autocomplete="off" enterkeyhint="search">
+      </label>
+      <a id="mail-go" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox">Search</a>
     </div>
-    <div class="card">
-      <h2>Emails I need to answer</h2>
-      <form id="mail-form" class="row">
-        <input id="mail-from" placeholder="Who is it from?" required>
-        <input id="mail-subject" placeholder="What's it about?" required>
-        <button class="btn primary">Add</button>
-      </form>
-      <ul id="mail-list" class="list"></ul>
-    </div>
+    <h2 class="section-h">Mailboxes</h2>
+    <ul class="group icons" id="mailboxes"></ul>
+    <h2 class="section-h">Need to answer</h2>
+    <ul class="group" id="mail-list"></ul>
+    <p class="foot">Tap + to remember an email you need to answer.</p>
   </section>
 
   <!-- MORE -->
-  <section id="more" class="panel" hidden>
-    <div class="card">
-      <h2>App color</h2>
-      <div class="swatches" id="swatches"></div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <h2>Your name</h2>
-        <form id="name-form" class="row">
-          <input id="name-input" placeholder="Hunter">
-          <button class="btn primary">Save</button>
-        </form>
-      </div>
-      <div class="card">
-        <h2>Your city for weather</h2>
-        <form id="city-form" class="row">
-          <input id="city-input" placeholder="Like Dallas, TX">
-          <button class="btn primary">Save</button>
-        </form>
-      </div>
-    </div>
-    <p id="saved-note" class="sub" hidden>Saved.</p>
-    <div class="card"><h2>My apps</h2><div id="app-grid" class="apps"></div></div>
-    <div class="card">
-      <h2>Add an app or website</h2>
-      <form id="app-form" class="row">
-        <input id="app-icon" placeholder="Emoji" maxlength="4" class="short">
-        <input id="app-name" placeholder="Name" required>
-        <input id="app-url" placeholder="website.com" required inputmode="url" autocapitalize="off">
-        <button class="btn primary">Add</button>
-      </form>
-    </div>
-    <div class="card">
-      <h2>Backup</h2>
-      <p class="muted">Your stuff is saved on this phone. Save a backup to Files now and then so you never lose it.</p>
-      <div class="row">
-        <button id="export-btn" type="button" class="btn">Save backup</button>
-        <label class="btn" for="import-file">Restore backup</label>
-        <input id="import-file" type="file" accept="application/json,.json" hidden>
-      </div>
-      <p id="backup-note" class="sub" hidden></p>
-    </div>
-    <div class="card">
-      <h2>Start over</h2>
-      <p class="muted">Erases everything in the app.</p>
-      <div class="confirm">
-        <button id="reset-btn" class="btn danger">Erase everything</button>
-        <span id="reset-confirm" class="confirm" hidden>
-          <span>Are you sure?</span>
-          <button id="reset-yes" class="btn danger">Yes, erase</button>
-          <button id="reset-no" class="btn">Cancel</button>
-        </span>
-      </div>
-    </div>
+  <section id="more" class="screen" hidden>
+    <h1 class="large-title">Settings</h1>
+    <ul class="group">
+      <li><button type="button" class="cell profile" data-sheet="name">
+        <span class="avatar" id="avatar">H</span>
+        <span class="main"><span class="t" style="font-size:20px" id="profile-name">Hunter</span><span class="s">Tap to change your name</span></span>
+        <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
+      </button></li>
+    </ul>
+    <h2 class="section-h">App color</h2>
+    <div class="group"><div class="swatches" id="swatches"></div></div>
+    <h2 class="section-h">Weather</h2>
+    <ul class="group icons">
+      <li><button type="button" class="cell" data-sheet="city">
+        <span class="tile" style="background:#0a84ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+        <span class="main t">My city</span><span class="v" id="city-val">Not set</span>
+        <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
+      </button></li>
+    </ul>
+    <h2 class="section-h">My apps <button type="button" id="edit-apps">Edit</button></h2>
+    <div class="springboard" id="app-grid"></div>
+    <ul class="group icons" style="margin-top:10px">
+      <li><button type="button" class="cell" data-sheet="app">
+        <span class="tile" style="background:var(--accent);color:var(--accent-fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg></span>
+        <span class="main t" style="color:var(--accent)">Add an app or website</span>
+      </button></li>
+    </ul>
+    <h2 class="section-h">Backup</h2>
+    <ul class="group icons">
+      <li><button type="button" class="cell" id="export-btn">
+        <span class="tile" style="background:#0a84ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></span>
+        <span class="main t">Save a backup</span></button></li>
+      <li><label class="cell" for="import-file" style="cursor:pointer">
+        <span class="tile" style="background:#34c759"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></span>
+        <span class="main t">Restore a backup</span></label>
+        <input id="import-file" type="file" accept="application/json,.json" hidden></li>
+    </ul>
+    <p class="foot">Your stuff is saved on this phone. Save a backup to Files now and then so you never lose it.</p>
+    <ul class="group" style="margin-top:28px">
+      <li><button type="button" class="cell center" data-sheet="erase"><span class="t red-text">Erase everything</span></button></li>
+    </ul>
+    <p class="foot" id="sync" style="text-align:center;padding-top:14px">Saved on this device</p>
   </section>
 </main>
 
-<nav class="tabs tabs-bottom" id="tabs-bottom" aria-label="Sections"></nav>
+<nav class="tabbar" aria-label="Sections"><div class="tabs" id="tabs"></div></nav>
+
+<div class="sheet-wrap" id="sheet" hidden>
+  <div class="shade" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div>
+      <div class="grabber"></div>
+      <div class="sheet-head">
+        <button type="button" class="cancel" data-close>Cancel</button>
+        <b id="sheet-title">Add</b>
+        <button type="submit" class="done" form="sheet-form" id="sheet-done">Add</button>
+      </div>
+    </div>
+    <form id="sheet-form" class="sheet-body" autocomplete="off"></form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="toast-text"></span></div>
 
 <script>
 (() => {
   const KEY = "hunters-app-v1";
-  const TABS = [
-    ["home", "Home", '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>'],
-    ["todo", "To-do", '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/>'],
-    ["money", "Money", '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
-    ["games", "Games", '<path d="M7 8h10a4 4 0 0 1 4 4v3a3 3 0 0 1-5.4 1.8L14.5 15h-5l-1.1 1.8A3 3 0 0 1 3 15v-3a4 4 0 0 1 4-4z"/><path d="M8 11v3M6.5 12.5h3"/>'],
-    ["gmail", "Gmail", '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'],
-    ["more", "More", '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'],
-  ];
-  const COLORS = {
-    green:  { name: "Hunter green", l: ["#355e3b", "#e4ede3"], d: ["#7fbf8a", "#233328", "#0e1a10"] },
-    blue:   { name: "Blue",   l: ["#2456a6", "#e3ebf8"], d: ["#84aef0", "#1e2a40", "#0b1424"] },
-    red:    { name: "Red",    l: ["#b3261e", "#f8e4e2"], d: ["#f2928b", "#3a1f1d", "#2a0a08"] },
-    purple: { name: "Purple", l: ["#6b3fa0", "#eee6f7"], d: ["#c3a2ec", "#2e2340", "#1c0f2c"] },
-    orange: { name: "Orange", l: ["#b0520c", "#fbeadb"], d: ["#f5a65e", "#3a2818", "#2a1505"] },
-    teal:   { name: "Teal",   l: ["#0e7470", "#ddf1ef"], d: ["#6fd1c9", "#183634", "#052523"] },
-    pink:   { name: "Pink",   l: ["#b0306e", "#f9e3ee"], d: ["#f29bc6", "#3c1f2e", "#2b0a1b"] },
-    black:  { name: "Black",  l: ["#22262b", "#e6e8eb"], d: ["#d4d8dd", "#2a2e33", "#121417"] },
+  const I = (p, sw = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const ICON = {
+    home: '<path d="M3.5 10.5L12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6.5H9V21H4.5a1 1 0 0 1-1-1z"/>',
+    todo: '<circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.5 9.3"/>',
+    money: '<rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19M6.5 14.5h4"/>',
+    games: '<path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v3a3 3 0 0 1-5.4 1.8L14.7 15H9.3l-1.4 1.8A3 3 0 0 1 2.5 15v-3A4.5 4.5 0 0 1 7 7.5z"/><path d="M8 10.5v3.5M6.25 12.25h3.5"/>',
+    gmail: '<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 6.5l9 6.5 9-6.5"/>',
+    more: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    sun: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>',
+    bill: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v6H3v-6z"/>',
+    unread: '<circle cx="12" cy="12" r="5"/>',
+    star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.8z"/>',
+    bag: '<path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    pencil: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/>',
   };
+  const CHEV = '<svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg>';
+  const CHECK = I('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 3);
   const TROPHY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm10 4v3a2 2 0 0 0 1-1.7V7zM7 7H6v1.3A2 2 0 0 0 7 10z"/></svg>';
-  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+  const TABS = [["home", "Home"], ["todo", "To-do"], ["money", "Money"], ["games", "Games"], ["gmail", "Mail"], ["more", "Settings"]];
+  const COLORS = {
+    green:  { name: "Hunter green", l: ["#2f7d46", "#e3f1e7"], d: ["#4cd07d", "#1c3324", "#04210f"] },
+    blue:   { name: "Blue",   l: ["#0a6cdc", "#e1edfb"], d: ["#4aa3ff", "#14283f", "#021326"] },
+    red:    { name: "Red",    l: ["#d7263d", "#fbe3e6"], d: ["#ff6b6b", "#3a1b1d", "#2a0507"] },
+    purple: { name: "Purple", l: ["#7b3fd0", "#efe6fb"], d: ["#bf8cff", "#2b1f40", "#170a2a"] },
+    orange: { name: "Orange", l: ["#c85a00", "#fdebd9"], d: ["#ffa94d", "#3a2615", "#2a1300"] },
+    teal:   { name: "Teal",   l: ["#00808a", "#d9f2f3"], d: ["#4fd8e0", "#123336", "#012326"] },
+    pink:   { name: "Pink",   l: ["#c8307a", "#fbe3ef"], d: ["#ff7eb6", "#3c1d2c", "#2b0717"] },
+    black:  { name: "Black",  l: ["#1c1c1e", "#e8e8ed"], d: ["#f2f2f7", "#2c2c2e", "#000000"] },
+  };
+  const TILE_COLORS = ["#ff9f0a", "#0a84ff", "#30b0c7", "#5e5ce6", "#ff375f", "#34c759", "#ac8e68", "#bf5af2", "#ff6b3d", "#64748b"];
+  const CAT = { Food: "🍕", Games: "🎮", Shopping: "🛍️", Subscriptions: "🔁", Transport: "🚌", Allowance: "💵", Job: "💼", Gift: "🎁", Other: "🧾" };
+  const KINDS = ["Homework", "Chore", "Test", "Other"];
+  const PLATFORMS = ["PC", "PlayStation", "Xbox", "Switch", "iPhone", "Roblox", "Other"];
+  const STATUS = { playing: "Playing", wishlist: "Want it", done: "Beat it" };
 
   const defaults = () => ({
     name: "Hunter", city: "", color: "green",
@@ -519,17 +584,21 @@ nav.tabs-bottom { display: none; }
     games: [], tx: [], mail: [], todos: [], goals: [], subs: [],
   });
 
+  // ---------- Helpers ----------
   const $ = (s) => document.querySelector(s);
   const uid = () => Math.random().toString(36).slice(2, 10);
   const money = (n) => (n < 0 ? "-" : "") + "$" + Math.abs(n).toFixed(2);
+  const money0 = (n) => (n < 0 ? "-" : "") + "$" + (Math.abs(n) >= 1000 ? Math.round(Math.abs(n)).toLocaleString() : Math.abs(n).toFixed(2));
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const iso = (d) => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   const today = () => iso(new Date());
   const parse = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
-  const prettyDate = (s) => parse(s).toLocaleDateString([], { month: "short", day: "numeric" });
+  const pretty = (s) => parse(s).toLocaleDateString([], { month: "short", day: "numeric" });
   const daysUntil = (s) => Math.round((parse(s) - parse(today())) / 86400000);
   const safeUrl = (u) => { u = String(u || "").trim(); if (!/^https?:\/\//i.test(u)) u = "https://" + u; return /^https?:\/\/[^\s"<>]+$/i.test(u) ? u : "#"; };
   const round2 = (n) => Math.round(n * 100) / 100;
+  const hash = (s) => [...String(s)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const tileColor = (s) => TILE_COLORS[hash(s) % TILE_COLORS.length];
 
   // ---------- Storage: this device first, then your claude.ai account ----------
   let state = defaults();
@@ -540,8 +609,8 @@ nav.tabs-bottom { display: none; }
     if (!cloud) return;
     if (saving) { pending = true; return; }
     saving = true;
-    try { await cloud.set({ state: JSON.stringify(state), savedAt: Date.now() }); setSync("Saved to your account"); }
-    catch (e) { setSync(e && e.code === "quota_exceeded" ? "Account storage full" : "Saved on this device"); }
+    try { await cloud.set({ state: JSON.stringify(state), savedAt: Date.now() }); setSync("Saved to your Claude account"); }
+    catch (e) { setSync(e && e.code === "quota_exceeded" ? "Account storage is full" : "Saved on this device"); }
     saving = false;
     if (pending) { pending = false; pushCloud(); }
   }
@@ -563,27 +632,43 @@ nav.tabs-bottom { display: none; }
         state = { ...defaults(), ...JSON.parse(snap.data().state) };
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
         render();
-        setSync("Saved to your account");
+        setSync("Saved to your Claude account");
       } else pushCloud();
     } catch (e) { /* keep working on this device */ }
   })();
 
-  // ---------- Tabs ----------
-  const tabHtml = TABS.map(([id, label, path]) =>
-    `<button type="button" data-tab="${id}" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`).join("");
-  $("#tabs-top").innerHTML = tabHtml;
-  $("#tabs-bottom").innerHTML = tabHtml;
-  function showTab(id) {
-    if (!TABS.some((x) => x[0] === id)) id = "home";
-    document.querySelectorAll("nav [data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
-    document.querySelectorAll(".panel").forEach((p) => (p.hidden = p.id !== id));
+  // ---------- Toast ----------
+  let toastT;
+  function toast(text) {
+    $("#toast-text").textContent = text;
+    $("#toast").classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(() => $("#toast").classList.remove("show"), 1600);
+  }
+
+  // ---------- Navigation ----------
+  let tab = "home", moneySeg = "tx", gameFilter = "all", editingApps = false;
+  $("#tabs").innerHTML = TABS.map(([id, label]) =>
+    `<button type="button" data-tab="${id}" aria-selected="false">${I(ICON[id])}<span>${label}</span><span class="badge" id="badge-${id}" hidden></span></button>`).join("");
+  const TITLES = { home: "Home", todo: "To-do", money: "Money", games: "Games", gmail: "Mail", more: "Settings" };
+  function showTab(id, seg) {
+    if (!TITLES[id]) id = "home";
+    if (id === tab && !seg) { window.scrollTo({ top: 0, behavior: "smooth" }); }
+    tab = id;
+    document.querySelectorAll("#tabs [data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
+    document.querySelectorAll("main > .screen").forEach((p) => (p.hidden = p.id !== id));
+    $("#nav-title").textContent = id === "home" ? "Hi, " + (state.name || "Hunter") : TITLES[id];
+    $("#nav-add").hidden = id === "more";
+    if (seg) showMoney(seg);
     try { localStorage.setItem(KEY + "-tab", id); } catch (e) {}
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); onScroll();
   }
   function showMoney(m) {
-    document.querySelectorAll("#money-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.m === m)));
+    moneySeg = m;
+    document.querySelectorAll("#money-seg button").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.m === m)));
     document.querySelectorAll("[data-mpanel]").forEach((p) => (p.hidden = p.dataset.mpanel !== m));
   }
+  const onScroll = () => document.body.classList.toggle("scrolled", window.scrollY > 36);
+  window.addEventListener("scroll", onScroll, { passive: true });
 
   // ---------- Color ----------
   function applyColor() {
@@ -597,31 +682,30 @@ nav.tabs-bottom { display: none; }
   $("#swatches").innerHTML = Object.entries(COLORS).map(([k, c]) =>
     `<button type="button" class="swatch" data-color="${k}" aria-label="${c.name}" title="${c.name}" style="background:${c.l[0]}"></button>`).join("");
 
-  // ---------- Helpers for lists ----------
-  const list = (el, html, msg) => { el.innerHTML = html || `<li class="empty">${msg}</li>`; };
-  const appTile = (a, i, del) => `<a class="app" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener">
-      <span class="ico" aria-hidden="true">${esc(a.icon || "🔗")}</span><span>${esc(a.name)}</span>
-      ${del ? `<button type="button" class="x" data-del-app="${i}" aria-label="Remove ${esc(a.name)}">×</button>` : ""}</a>`;
-  const txItem = (x, del) => `<li>
-      <div class="grow"><div>${esc(x.desc)}</div><div class="sub">${esc(x.cat)} · ${esc(prettyDate(x.date))}</div></div>
-      <span class="amt ${x.type === "in" ? "good" : "bad"}">${x.type === "in" ? "+" : "−"}${money(x.amount)}</span>
-      ${del ? `<button type="button" class="x" data-del-tx="${x.id}" aria-label="Delete">×</button>` : ""}</li>`;
+  // ---------- Pieces ----------
+  const emptyCell = (msg) => `<li><div class="empty-cell">${msg}</div></li>`;
+  const swipeLi = (kind, id, inner) => `<li class="swipe">${inner}<button type="button" class="del-btn" data-del="${kind}:${id}" tabindex="-1">Delete</button></li>`;
+  const appIcon = (a, i, minus) => `<a class="app" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener">
+      <span class="icon" style="background:${tileColor(a.name)}">${esc(a.icon || "🔗")}</span><span class="name">${esc(a.name)}</span>
+      ${minus ? `<button type="button" class="minus" data-del="app:${i}" aria-label="Remove ${esc(a.name)}">−</button>` : ""}</a>`;
+  const txCell = (x) => `<div class="cell">
+      <span class="tile round soft">${CAT[x.cat] || "🧾"}</span>
+      <span class="main"><span class="t">${esc(x.desc)}</span><span class="s">${esc(x.cat)} · ${esc(pretty(x.date))}</span></span>
+      <span class="amt ${x.type === "in" ? "good" : ""}">${x.type === "in" ? "+" : "−"}${money(x.amount)}</span></div>`;
 
-  function dueTag(t) {
+  function dueLabel(t) {
     if (!t.due) return "";
     const n = daysUntil(t.due);
-    if (t.done) return `<span class="due">${prettyDate(t.due)}</span>`;
-    if (n < 0) return `<span class="due late">Late</span>`;
-    if (n === 0) return `<span class="due soon">Today</span>`;
-    if (n === 1) return `<span class="due soon">Tomorrow</span>`;
-    if (n < 7) return `<span class="due">${parse(t.due).toLocaleDateString([], { weekday: "short" })}</span>`;
-    return `<span class="due">${prettyDate(t.due)}</span>`;
+    if (t.done) return pretty(t.due);
+    if (n < 0) return `<span class="due late">Late · ${pretty(t.due)}</span>`;
+    if (n === 0) return `<span class="due today">Today</span>`;
+    if (n === 1) return `<span class="due">Tomorrow</span>`;
+    if (n < 7) return `<span class="due">${parse(t.due).toLocaleDateString([], { weekday: "long" })}</span>`;
+    return `<span class="due">${pretty(t.due)}</span>`;
   }
-  const todoItem = (t, del) => `<li class="${t.done ? "done" : ""}">
-      <input type="checkbox" class="check" data-toggle-todo="${t.id}" ${t.done ? "checked" : ""} aria-label="Done">
-      <div class="grow"><div>${esc(t.text)}</div><div class="sub">${esc(t.kind)}</div></div>
-      ${dueTag(t)}
-      ${del ? `<button type="button" class="x" data-del-todo="${t.id}" aria-label="Delete">×</button>` : ""}</li>`;
+  const todoCell = (t) => `<div class="cell ${t.done ? "done-row" : ""}">
+      <button type="button" class="tick ${t.done ? "on" : ""}" data-toggle-todo="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}">${CHECK}</button>
+      <span class="main"><span class="t">${esc(t.text)}</span><span class="s">${esc(t.kind)}${t.due ? " · " + dueLabel(t) : ""}</span></span></div>`;
   const openTodos = () => state.todos.filter((t) => !t.done).sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
 
   function nextCharge(day) {
@@ -633,259 +717,361 @@ nav.tabs-bottom { display: none; }
   }
   const subsSorted = () => state.subs.map((s) => ({ ...s, next: nextCharge(s.day) })).sort((a, b) => a.next.localeCompare(b.next));
   const whenText = (s) => { const n = daysUntil(s); return n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`; };
-  const subItem = (s, del) => `<li>
-      <div class="grow"><div>${esc(s.name)}</div><div class="sub">Charges ${prettyDate(s.next)} (${whenText(s.next)})</div></div>
-      <span class="amt">${money(s.price)}</span>
-      ${del ? `<button type="button" class="x" data-del-sub="${s.id}" aria-label="Delete">×</button>` : ""}</li>`;
 
-  function goalHtml(g, controls) {
-    const pct = Math.min(100, g.target ? (g.saved / g.target) * 100 : 0);
-    const won = g.saved >= g.target;
-    return `<div class="goal">
-      <div class="head"><h3>${esc(g.name)}</h3>
-        ${controls ? `<button type="button" class="x" data-del-goal="${g.id}" aria-label="Delete goal">×</button>` : ""}</div>
-      <div class="bar big ${won ? "won" : ""}">
-        <div class="lbl"><span class="nums"><b>${money(g.saved)}</b> of ${money(g.target)}</span><span class="nums ${won ? "good" : "muted"}">${won ? "Goal reached!" : Math.floor(pct) + "%"}</span></div>
-        <div class="track"><div class="fill" style="width:${pct}%"></div></div>
-      </div>
-      ${won ? "" : `<div class="sub">${money(g.target - g.saved)} to go</div>`}
-      ${controls ? `<div class="row">
-        <input type="number" step="0.01" min="0.01" placeholder="$" inputmode="decimal" id="goal-amt-${g.id}" aria-label="Amount">
-        <button type="button" class="btn sm primary" data-goal-add="${g.id}" data-sign="1">Add</button>
-        <button type="button" class="btn sm" data-goal-add="${g.id}" data-sign="-1">Take out</button>
-      </div>` : ""}
-    </div>`;
+  function ring(pct, won, size = 64) {
+    const r = 26, c = 2 * Math.PI * r;
+    return `<svg class="ring ${won ? "won" : ""}" viewBox="0 0 64 64" style="width:${size}px;height:${size}px" aria-hidden="true">
+      <circle class="bgc" cx="32" cy="32" r="${r}" fill="none" stroke-width="7"/>
+      <circle class="fg" cx="32" cy="32" r="${r}" fill="none" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}" transform="rotate(-90 32 32)"/>
+      <text x="32" y="37" text-anchor="middle">${won ? "✓" : Math.floor(pct) + "%"}</text></svg>`;
   }
-
-  // ---------- Clock ----------
-  function tick() {
-    const d = new Date();
-    $("#clock").textContent = d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) + (innerWidth <= 720 ? "\n" : " · ") + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    const h = d.getHours();
-    $("#greeting").textContent = `${h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"}, ${state.name || "Hunter"}`;
-  }
+  const goalPct = (g) => Math.min(100, g.target ? (g.saved / g.target) * 100 : 0);
 
   // ---------- Render ----------
-  let gameFilter = "all";
   function render() {
     applyColor();
+    const now = new Date();
     let inc = 0, out = 0;
     state.tx.forEach((x) => (x.type === "in" ? (inc += x.amount) : (out += x.amount)));
     const sortedTx = [...state.tx].sort((a, b) => b.date.localeCompare(a.date));
     const todos = openTodos();
-    const late = todos.filter((t) => t.due && daysUntil(t.due) <= 0).length;
+    const lateOrToday = todos.filter((t) => t.due && daysUntil(t.due) <= 0).length;
     const subs = subsSorted();
     const subTotal = state.subs.reduce((s, x) => s + x.price, 0);
     const hours = state.games.reduce((s, g) => s + g.hours, 0);
+    const playing = state.games.filter((g) => g.status === "playing").length;
+    const name = state.name || "Hunter";
 
     // Home
-    $("#s-bal").textContent = money(inc - out);
-    $("#s-todo").textContent = todos.length;
-    $("#s-todo-note").textContent = late ? `${late} due today or late` : "";
-    $("#s-subs").textContent = money(subTotal);
-    $("#s-hours").textContent = hours;
-    list($("#home-todo"), todos.slice(0, 4).map((t) => todoItem(t, false)).join(""), "All done! Nothing left to do.");
-    $("#home-goal").innerHTML = state.goals.length ? goalHtml(state.goals[0], false) :
-      `<p class="empty">Saving for something? Add a goal in Money, then Savings goals.</p>`;
-    list($("#home-subs"), subs.slice(0, 3).map((s) => subItem(s, false)).join(""), "No subscriptions added yet.");
-    $("#home-apps").innerHTML = state.apps.slice(0, 8).map((a, i) => appTile(a, i, false)).join("") || `<p class="empty">Add apps in More.</p>`;
-    list($("#home-tx"), sortedTx.slice(0, 4).map((x) => txItem(x, false)).join(""), "No transactions yet.");
-    $("#home-weather").innerHTML = state.city
-      ? `<div class="weather">${SUN}<div style="display:grid;gap:8px"><b>${esc(state.city)}</b>
-          <a class="btn sm primary" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent("weather " + state.city)}">See today's weather</a></div></div>`
-      : `<form id="home-city" class="row"><input id="home-city-input" placeholder="Your city, like Dallas, TX" required><button class="btn primary">Save</button></form>`;
+    $("#home-date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    const h = now.getHours();
+    $("#home-title").textContent = `${h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"}, ${name}`;
+    if (tab === "home") $("#nav-title").textContent = "Hi, " + name;
+    const goal = state.goals.find((g) => g.saved < g.target) || state.goals[0];
+    const w = [];
+    w.push(`<button type="button" class="widget" data-go="money:tx"><span class="wl">${I(ICON.money)}Balance</span>
+      <span class="wv">${money0(inc - out)}</span><span class="ws">${money0(inc)} in · ${money0(out)} out</span></button>`);
+    w.push(`<button type="button" class="widget" data-go="todo"><span class="wl">${I(ICON.todo)}To-do</span>
+      <span class="wv">${todos.length}</span><span class="ws ${lateOrToday ? "bad" : ""}">${todos.length ? (lateOrToday ? `${lateOrToday} due today or late` : "left to do") : "All done!"}</span></button>`);
+    w.push(state.city
+      ? `<a class="widget" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent("weather " + state.city)}">
+          <span class="wl">${I(ICON.sun)}Weather</span><span class="wv" style="font-size:20px">${esc(state.city)}</span><span class="ws">Tap for today's forecast</span></a>`
+      : `<button type="button" class="widget" data-sheet="city"><span class="wl">${I(ICON.sun)}Weather</span><span class="wv" style="font-size:20px">Set your city</span><span class="ws">Tap to add it</span></button>`);
+    w.push(`<button type="button" class="widget" data-go="money:subs"><span class="wl">${I(ICON.bill)}Next bill</span>
+      ${subs[0] ? `<span class="wv" style="font-size:22px">${money(subs[0].price)}</span><span class="ws">${esc(subs[0].name)} · ${whenText(subs[0].next)}</span>`
+               : `<span class="wv" style="font-size:20px">None</span><span class="ws">Add your subscriptions</span>`}</button>`);
+    w.push(`<button type="button" class="widget" data-go="games"><span class="wl">${I(ICON.games)}Games</span>
+      <span class="wv">${hours}<span style="font-size:15px;font-weight:600"> hr</span></span><span class="ws">${playing} playing now</span></button>`);
+    w.push(goal
+      ? `<button type="button" class="widget" data-go="money:goals" style="grid-template-columns:auto 1fr;align-items:center;gap:10px">${ring(goalPct(goal), goal.saved >= goal.target, 52)}
+          <span style="display:grid;gap:2px;min-width:0"><span class="wl">Saving for</span><span style="font-weight:600;overflow-wrap:anywhere">${esc(goal.name)}</span><span class="ws">${money0(goal.saved)} of ${money0(goal.target)}</span></span></button>`
+      : `<button type="button" class="widget" data-sheet="goal"><span class="wl">Saving up</span><span class="wv" style="font-size:20px">Start a goal</span><span class="ws">Like a PS5 or new shoes</span></button>`);
+    $("#widgets").innerHTML = w.join("");
+    $("#home-todo").innerHTML = todos.slice(0, 3).map((t) => swipeLi("todo", t.id, todoCell(t))).join("") || emptyCell("Nothing to do. Nice!");
+    $("#home-apps").innerHTML = state.apps.slice(0, 8).map((a, i) => appIcon(a, i, false)).join("") || `<div class="empty-cell" style="grid-column:1/-1">Add apps in Settings.</div>`;
+    $("#home-tx").innerHTML = sortedTx.slice(0, 3).map((x) => swipeLi("tx", x.id, txCell(x))).join("") || emptyCell("No money activity yet. Tap + to add some.");
 
-    // To-do
-    list($("#todo-list"), todos.map((t) => todoItem(t, true)).join(""), "Nothing to do. Add homework or chores above.");
+    // To-do (grouped like Reminders)
+    const groups = [["Late", (t) => t.due && daysUntil(t.due) < 0], ["Today", (t) => t.due && daysUntil(t.due) === 0],
+      ["This week", (t) => t.due && daysUntil(t.due) > 0 && daysUntil(t.due) < 7], ["Later", (t) => t.due && daysUntil(t.due) >= 7], ["No due date", (t) => !t.due]];
+    let html = groups.map(([label, fn]) => {
+      const items = todos.filter(fn);
+      return items.length ? `<h2 class="section-h ${label === "Late" ? "bad" : ""}">${label}</h2><ul class="group">${items.map((t) => swipeLi("todo", t.id, todoCell(t))).join("")}</ul>` : "";
+    }).join("");
+    if (!todos.length) html = `<div class="notice" style="text-align:center;padding:28px 16px"><b>All done!</b><p>Tap + to add homework, chores or tests.</p></div>`;
     const done = state.todos.filter((t) => t.done);
-    $("#done-card").hidden = !done.length;
-    list($("#done-list"), done.map((t) => todoItem(t, true)).join(""), "");
+    if (done.length) html += `<h2 class="section-h">Finished <button type="button" data-clear-done>Clear</button></h2><ul class="group">${done.map((t) => swipeLi("todo", t.id, todoCell(t))).join("")}</ul>`;
+    html += `<p class="foot">Swipe left on a to-do to delete it.</p>`;
+    $("#todo-groups").innerHTML = html;
+    const badge = $("#badge-todo"); badge.hidden = !lateOrToday; badge.textContent = lateOrToday;
 
     // Money
     $("#m-in").textContent = money(inc);
     $("#m-out").textContent = money(out);
     $("#m-bal").textContent = money(inc - out);
-    list($("#tx-list"), sortedTx.map((x) => txItem(x, true)).join(""), "No transactions yet.");
+    $("#tx-list").innerHTML = sortedTx.map((x) => swipeLi("tx", x.id, txCell(x))).join("") || emptyCell("No transactions yet. Tap + to add one.");
     const cats = {};
     state.tx.filter((x) => x.type === "out").forEach((x) => (cats[x.cat] = (cats[x.cat] || 0) + x.amount));
     const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
     const cmax = entries[0]?.[1] || 1;
     $("#cat-bars").innerHTML = entries.map(([c, v]) => `<div class="bar">
-        <div class="lbl"><span>${esc(c)}</span><span class="amt">${money(v)}</span></div>
+        <div class="bl"><span>${CAT[c] || ""} ${esc(c)}</span><span class="amt">${money(v)}</span></div>
         <div class="track"><div class="fill" style="width:${(v / cmax) * 100}%"></div></div></div>`).join("") ||
-      `<p class="empty">Add something you spent money on to see it here.</p>`;
-    $("#goal-list").innerHTML = state.goals.map((g) => goalHtml(g, true)).join("") || `<p class="empty">No goals yet. What do you want to save up for?</p>`;
-    $("#sub-month").textContent = money(subTotal);
-    $("#sub-year").textContent = money(subTotal * 12);
-    $("#sub-next").textContent = subs[0] ? prettyDate(subs[0].next) : "None";
-    list($("#sub-list"), subs.map((s) => subItem(s, true)).join(""), "No subscriptions yet.");
+      `<span class="muted" style="font-size:15px;color:var(--muted)">Add something you spent money on to see it here.</span>`;
+    $("#goal-list").innerHTML = state.goals.map((g) => {
+      const won = g.saved >= g.target;
+      return `<button type="button" class="goal-card" data-goal="${g.id}">${ring(goalPct(g), won)}
+        <span style="display:grid;gap:3px;min-width:0"><span class="gn">${esc(g.name)}</span>
+        <span class="ga">${money(g.saved)} of ${money(g.target)}</span>
+        <span class="ga ${won ? "good" : ""}">${won ? "Goal reached!" : money(g.target - g.saved) + " to go"}</span></span></button>`;
+    }).join("") || `<div class="notice" style="text-align:center;padding:28px 16px"><b>No goals yet</b><p>Tap + to start saving for something.</p></div>`;
+    $("#sub-month").textContent = money0(subTotal);
+    $("#sub-year").textContent = money0(subTotal * 12);
+    $("#sub-next").textContent = subs[0] ? pretty(subs[0].next) : "None";
+    $("#sub-list").innerHTML = subs.map((s) => swipeLi("sub", s.id, `<div class="cell">
+        <span class="tile" style="background:${tileColor(s.name)}">${esc(s.name.trim()[0]?.toUpperCase() || "?")}</span>
+        <span class="main"><span class="t">${esc(s.name)}</span><span class="s">${pretty(s.next)} · ${whenText(s.next)}</span></span>
+        <span class="amt">${money(s.price)}</span></div>`)).join("") || emptyCell("No subscriptions yet. Tap + to add one.");
 
     // Games
-    const label = { playing: "Playing", wishlist: "Want it", done: "Beat it" };
     const beaten = state.games.filter((g) => g.status === "done");
     $("#g-hours").textContent = hours;
-    $("#g-playing").textContent = state.games.filter((g) => g.status === "playing").length;
+    $("#g-playing").textContent = playing;
     $("#g-done").textContent = beaten.length;
-    const top = [...state.games].filter((g) => g.hours > 0).sort((a, b) => b.hours - a.hours).slice(0, 6);
+    $("#trophy-wrap").hidden = !beaten.length;
+    $("#shelf").innerHTML = beaten.map((g) => `<div class="trophy">${TROPHY}<span class="tn">${esc(g.name)}</span><span class="ts">${g.beatOn ? "Beat " + pretty(g.beatOn) : esc(g.platform)}</span></div>`).join("");
+    const top = [...state.games].filter((g) => g.hours > 0).sort((a, b) => b.hours - a.hours).slice(0, 5);
     const gmax = top[0]?.hours || 1;
+    $("#chart-wrap").hidden = !top.length;
     $("#game-chart").innerHTML = top.map((g) => `<div class="bar">
-        <div class="lbl"><span>${esc(g.name)}</span><span class="amt">${g.hours} hr</span></div>
-        <div class="track"><div class="fill" style="width:${(g.hours / gmax) * 100}%"></div></div></div>`).join("") ||
-      `<p class="empty">Tap + on a game to add hours played.</p>`;
-    $("#shelf").innerHTML = beaten.map((g) => `<div class="trophy">${TROPHY}<span class="tn">${esc(g.name)}</span><span class="tsub">${g.beatOn ? "Beat " + prettyDate(g.beatOn) : esc(g.platform)}</span></div>`).join("") ||
-      `<p class="empty">Beat a game to put a trophy here.</p>`;
+        <div class="bl"><span>${esc(g.name)}</span><span class="amt">${g.hours} hr</span></div>
+        <div class="track"><div class="fill" style="width:${(g.hours / gmax) * 100}%"></div></div></div>`).join("");
     const games = state.games.filter((g) => gameFilter === "all" || g.status === gameFilter);
-    $("#game-list").innerHTML = games.map((g) => `<div class="game">
-        <div class="top"><span class="name">${esc(g.name)}</span><button type="button" class="x" data-del-game="${g.id}" aria-label="Remove ${esc(g.name)}">×</button></div>
-        <div class="row" style="gap:6px"><span class="pill ${g.status}">${label[g.status]}</span><span class="pill">${esc(g.platform)}</span></div>
-        <div class="bottom">
-          <select data-status-game="${g.id}" aria-label="Status">
-            ${Object.entries(label).map(([v, l]) => `<option value="${v}" ${g.status === v ? "selected" : ""}>${l}</option>`).join("")}
-          </select>
-          <div class="hours"><button type="button" class="btn sm" data-hour="${g.id}" data-d="-1" aria-label="Less time">−</button>
-            <span>${g.hours} hr</span>
-            <button type="button" class="btn sm" data-hour="${g.id}" data-d="1" aria-label="More time">+</button></div>
-        </div></div>`).join("") || `<p class="empty">No games here yet. Add one above.</p>`;
+    $("#game-list").innerHTML = games.map((g) => `<li><button type="button" class="cell" data-game="${g.id}">
+        <span class="tile" style="background:${tileColor(g.name)}">${esc(g.name.trim()[0]?.toUpperCase() || "?")}</span>
+        <span class="main"><span class="t">${esc(g.name)}</span><span class="s">${esc(g.platform)} · ${STATUS[g.status]}</span></span>
+        <span class="v">${g.hours} hr</span>${CHEV}</button></li>`).join("") || emptyCell(state.games.length ? "No games in this list." : "No games yet. Tap + to add one.");
 
-    // Gmail
-    list($("#mail-list"), state.mail.map((m) => `<li>
-        <input type="checkbox" class="check" data-done-mail="${m.id}" aria-label="Mark done">
-        <div class="grow"><div>${esc(m.subject)}</div><div class="sub">From ${esc(m.from)} · added ${esc(prettyDate(m.date))}</div></div>
-        <a class="btn sm" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/${encodeURIComponent(m.from + " " + m.subject)}">Find</a></li>`).join(""),
-      "Nothing to answer right now.");
+    // Mail
+    const MB = [["Inbox", "#inbox", ICON.inbox, "#0a84ff"], ["Unread", "#search/is%3Aunread", ICON.unread, "#0a84ff"],
+      ["Starred", "#starred", ICON.star, "#ff9f0a"], ["Purchases", "#search/category%3Apurchases", ICON.bag, "#34c759"],
+      ["Updates", "#search/category%3Aupdates", ICON.bell, "#ff375f"], ["Write an email", "#inbox?compose=new", ICON.pencil, "var(--accent)"]];
+    $("#mailboxes").innerHTML = MB.map(([l, hsh, ic, col]) => `<li><a class="cell" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/${hsh}">
+        <span class="tile" style="background:${col};color:#fff">${I(ic, 2)}</span><span class="main t">${l}</span>${CHEV}</a></li>`).join("");
+    $("#mail-list").innerHTML = state.mail.map((m) => swipeLi("mail", m.id, `<div class="cell">
+        <button type="button" class="tick" data-done-mail="${m.id}" aria-label="Mark answered">${CHECK}</button>
+        <a class="main" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#search/${encodeURIComponent(m.from + " " + m.subject)}">
+          <span class="t">${esc(m.subject)}</span><span class="s">From ${esc(m.from)} · added ${esc(pretty(m.date))}</span></a></div>`)).join("") || emptyCell("Nothing to answer right now.");
+    const mb = $("#badge-gmail"); mb.hidden = !state.mail.length; mb.textContent = state.mail.length;
 
-    // More
-    $("#app-grid").innerHTML = state.apps.map((a, i) => appTile(a, i, true)).join("") || `<p class="empty">No apps yet. Add one below.</p>`;
+    // Settings
+    $("#avatar").textContent = (name.trim()[0] || "H").toUpperCase();
+    $("#profile-name").textContent = name;
+    $("#city-val").textContent = state.city || "Not set";
+    $("#app-grid").classList.toggle("editing", editingApps);
+    $("#edit-apps").textContent = editingApps ? "Done" : "Edit";
+    $("#app-grid").innerHTML = state.apps.map((a, i) => appIcon(a, i, editingApps)).join("") || `<div class="empty-cell" style="grid-column:1/-1">No apps yet.</div>`;
     document.querySelectorAll(".swatch").forEach((s) => s.setAttribute("aria-pressed", String(s.dataset.color === state.color)));
-    if (document.activeElement !== $("#name-input")) $("#name-input").value = state.name || "";
-    if (document.activeElement !== $("#city-input")) $("#city-input").value = state.city || "";
-    tick();
   }
 
-  // ---------- Forms ----------
-  const on = (sel, fn) => $(sel).addEventListener("submit", (e) => { e.preventDefault(); fn(e); });
-  const flashSaved = () => { $("#saved-note").hidden = false; setTimeout(() => ($("#saved-note").hidden = true), 2000); };
+  // ---------- Sheets ----------
+  const fieldRow = (label, input) => `<li><label class="field"><span>${label}</span>${input}</label></li>`;
+  const segRadio = (name, opts, val) => `<div class="seg">${opts.map(([v, l]) =>
+    `<label><input type="radio" name="${name}" value="${esc(v)}" ${v === val ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div>`;
+  const opts = (list, val) => list.map((o) => `<option ${o === val ? "selected" : ""}>${esc(o)}</option>`).join("");
+  let sheetType = null, sheetCtx = null;
 
-  on("#todo-form", (e) => {
-    state.todos.push({ id: uid(), text: $("#todo-text").value.trim(), kind: $("#todo-kind").value, due: $("#todo-due").value || "", done: false });
-    $("#todo-text").value = ""; $("#todo-due").value = ""; save();
+  const SHEETS = {
+    new: () => ({ title: "Add something", done: "", body: `<ul class="group icons">${[
+      ["todo", "To-do or homework", ICON.todo], ["tx", "Money in or out", ICON.money], ["goal", "Savings goal", ICON.star],
+      ["sub", "Subscription", ICON.bill], ["game", "Game", ICON.games]].map(([k, l, ic]) =>
+        `<li><button type="button" class="cell" data-sheet="${k}"><span class="tile" style="background:var(--accent);color:var(--accent-fg)">${I(ic, 2)}</span><span class="main t">${l}</span>${CHEV}</button></li>`).join("")}</ul>` }),
+    todo: () => ({ title: "New To-do", body: `<ul class="group">
+        ${fieldRow("To-do", `<input name="text" required placeholder="Math worksheet" class="left">`)}
+        ${fieldRow("Due", `<input name="due" type="date">`)}</ul>${segRadio("kind", KINDS.map((k) => [k, k]), "Homework")}` }),
+    tx: () => ({ title: "New Transaction", body: `${segRadio("type", [["out", "I spent"], ["in", "I got"]], "out")}<ul class="group">
+        ${fieldRow("Amount", `<input name="amount" type="number" step="0.01" min="0.01" inputmode="decimal" required placeholder="$0.00">`)}
+        ${fieldRow("What for", `<input name="desc" required placeholder="Pizza">`)}
+        ${fieldRow("Category", `<select name="cat">${opts(Object.keys(CAT), "Food")}</select>`)}
+        ${fieldRow("Date", `<input name="date" type="date" value="${today()}" required>`)}</ul>` }),
+    goal: () => ({ title: "New Goal", body: `<ul class="group">
+        ${fieldRow("Saving for", `<input name="name" required placeholder="PS5">`)}
+        ${fieldRow("Goal", `<input name="target" type="number" step="0.01" min="1" inputmode="decimal" required placeholder="$500">`)}
+        ${fieldRow("Saved so far", `<input name="saved" type="number" step="0.01" min="0" inputmode="decimal" placeholder="$0">`)}</ul>` }),
+    goalmoney: (g) => ({ title: g.name, done: "Save", body: `<div style="display:grid;justify-items:center;gap:6px">${ring(goalPct(g), g.saved >= g.target, 96)}
+        <span class="num" style="font-size:15px;color:var(--muted)">${money(g.saved)} of ${money(g.target)}</span></div>
+        ${segRadio("dir", [["1", "Add money"], ["-1", "Take out"]], "1")}
+        <ul class="group">${fieldRow("Amount", `<input name="amount" type="number" step="0.01" min="0.01" inputmode="decimal" required placeholder="$0.00">`)}</ul>
+        <button type="button" class="big-btn danger" data-del="goal:${g.id}">Delete goal</button>` }),
+    sub: () => ({ title: "New Subscription", body: `<ul class="group">
+        ${fieldRow("Name", `<input name="name" required placeholder="Game Pass">`)}
+        ${fieldRow("Per month", `<input name="price" type="number" step="0.01" min="0.01" inputmode="decimal" required placeholder="$0.00">`)}
+        ${fieldRow("Charges on", `<select name="day">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${i + 1 === new Date().getDate() ? "selected" : ""}>Day ${i + 1}</option>`).join("")}</select>`)}</ul>` }),
+    game: () => ({ title: "New Game", body: `<ul class="group">
+        ${fieldRow("Game", `<input name="name" required placeholder="Minecraft">`)}
+        ${fieldRow("Platform", `<select name="platform">${opts(PLATFORMS, "PC")}</select>`)}</ul>
+        ${segRadio("status", Object.entries(STATUS), "playing")}` }),
+    gameedit: (g) => ({ title: g.name, done: "Done", body: `
+        <div class="stepper"><button type="button" data-step="-1" aria-label="Less time">−</button>
+          <span class="sv"><span id="hours-val">${g.hours}</span><span class="su">hours played</span></span>
+          <button type="button" data-step="1" aria-label="More time">+</button></div>
+        <input type="hidden" name="hours" value="${g.hours}">
+        ${segRadio("status", Object.entries(STATUS), g.status)}
+        <ul class="group">${fieldRow("Platform", `<select name="platform">${opts(PLATFORMS, g.platform)}</select>`)}</ul>
+        <button type="button" class="big-btn danger" data-del="game:${g.id}">Delete game</button>` }),
+    mail: () => ({ title: "Need to Answer", body: `<ul class="group">
+        ${fieldRow("From", `<input name="from" required placeholder="Coach Smith">`)}
+        ${fieldRow("About", `<input name="subject" required placeholder="Practice time">`)}</ul>` }),
+    app: () => ({ title: "Add App", body: `<ul class="group">
+        ${fieldRow("Name", `<input name="name" required placeholder="Netflix">`)}
+        ${fieldRow("Website", `<input name="url" required inputmode="url" autocapitalize="off" placeholder="netflix.com">`)}
+        ${fieldRow("Emoji", `<input name="icon" maxlength="4" placeholder="🍿">`)}</ul>` }),
+    name: () => ({ title: "Your Name", done: "Save", body: `<ul class="group">${fieldRow("Name", `<input name="name" value="${esc(state.name)}" required>`)}</ul>` }),
+    city: () => ({ title: "Your City", done: "Save", body: `<ul class="group">${fieldRow("City", `<input name="city" value="${esc(state.city)}" placeholder="Dallas, TX">`)}</ul>
+        <p class="foot">The Weather widget on Home opens today's forecast for this city.</p>` }),
+    erase: () => ({ title: "Erase Everything?", done: "", body: `<p style="text-align:center;color:var(--muted)">This removes all your to-dos, money, goals, bills, games and apps.</p>
+        <button type="button" class="big-btn danger" data-erase>Erase everything</button>` }),
+  };
+
+  function openSheet(type, ctx) {
+    const s = SHEETS[type](ctx);
+    sheetType = type; sheetCtx = ctx;
+    $("#sheet-title").textContent = s.title;
+    const done = s.done ?? "Add";
+    $("#sheet-done").textContent = done; $("#sheet-done").hidden = !done;
+    $("#sheet-form").innerHTML = s.body;
+    const wrap = $("#sheet");
+    if (wrap.hidden) {
+      wrap.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add("open")));
+    }
+    const first = $("#sheet-form input:not([type=hidden]):not([type=radio])");
+    if (first && !["goalmoney", "gameedit", "erase", "new"].includes(type)) setTimeout(() => first.focus(), 350);
+  }
+  function closeSheet() {
+    const wrap = $("#sheet");
+    wrap.classList.remove("open");
+    document.activeElement?.blur?.();
+    setTimeout(() => { if (!wrap.classList.contains("open")) wrap.hidden = true; }, 320);
+  }
+
+  $("#sheet-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    const num = (v) => round2(parseFloat(v));
+    switch (sheetType) {
+      case "todo": state.todos.push({ id: uid(), text: f.text.trim(), kind: f.kind || "Other", due: f.due || "", done: false }); toast("To-do added"); break;
+      case "tx": { const a = num(f.amount); if (!(a > 0)) return; state.tx.push({ id: uid(), type: f.type, desc: f.desc.trim(), amount: a, cat: f.cat, date: f.date || today() }); toast(f.type === "in" ? "Money added" : "Spending added"); break; }
+      case "goal": { const t = num(f.target); if (!(t > 0)) return; state.goals.push({ id: uid(), name: f.name.trim(), target: t, saved: Math.max(0, num(f.saved) || 0) }); toast("Goal added"); break; }
+      case "goalmoney": { const g = state.goals.find((x) => x.id === sheetCtx.id); const a = num(f.amount); if (!g || !(a > 0)) return;
+        const was = g.saved >= g.target; g.saved = Math.max(0, round2(g.saved + a * +f.dir));
+        toast(!was && g.saved >= g.target ? "Goal reached! 🎉" : f.dir === "1" ? "Money added" : "Money taken out"); break; }
+      case "sub": { const p = num(f.price); if (!(p > 0)) return; state.subs.push({ id: uid(), name: f.name.trim(), price: p, day: +f.day }); toast("Subscription added"); break; }
+      case "game": state.games.unshift({ id: uid(), name: f.name.trim(), platform: f.platform, status: f.status, hours: 0, beatOn: f.status === "done" ? today() : "" }); toast("Game added"); break;
+      case "gameedit": { const g = state.games.find((x) => x.id === sheetCtx.id); if (!g) break;
+        const newlyBeat = f.status === "done" && g.status !== "done";
+        g.hours = Math.max(0, +f.hours || 0); g.status = f.status; g.platform = f.platform; if (newlyBeat) { g.beatOn = today(); }
+        if (newlyBeat) toast("Trophy earned! 🏆"); break; }
+      case "mail": state.mail.unshift({ id: uid(), from: f.from.trim(), subject: f.subject.trim(), date: today() }); toast("Saved"); break;
+      case "app": state.apps.push({ icon: (f.icon || "").trim() || "🔗", name: f.name.trim(), url: safeUrl(f.url) }); toast("App added"); break;
+      case "name": state.name = f.name.trim() || "Hunter"; toast("Name saved"); break;
+      case "city": state.city = (f.city || "").trim(); toast("City saved"); break;
+    }
+    closeSheet(); save();
   });
-  on("#tx-form", () => {
-    const amount = round2(parseFloat($("#tx-amount").value));
-    if (!(amount > 0)) return;
-    state.tx.push({ id: uid(), type: $("#tx-type").value, desc: $("#tx-desc").value.trim(), amount, cat: $("#tx-cat").value, date: $("#tx-date").value || today() });
-    $("#tx-desc").value = ""; $("#tx-amount").value = ""; save();
+
+  // ---------- Swipe to delete ----------
+  let sw = null, openRow = null, swallowClick = false;
+  const closeRow = () => { if (openRow) { openRow.classList.remove("open"); openRow = null; } };
+  document.addEventListener("pointerdown", (e) => {
+    const cell = e.target.closest(".swipe > .cell");
+    if (openRow && !e.target.closest(".del-btn") && cell !== openRow) { closeRow(); swallowClick = true; return; }
+    if (!cell) return;
+    sw = { cell, x: e.clientX, y: e.clientY, base: cell.classList.contains("open") ? -88 : 0, active: false, t: 0 };
   });
-  $("#tx-date").value = today();
-  on("#goal-form", (e) => {
-    const target = round2(parseFloat($("#goal-target").value));
-    if (!(target > 0)) return;
-    state.goals.push({ id: uid(), name: $("#goal-name").value.trim(), target, saved: 0 });
-    e.target.reset(); save();
+  document.addEventListener("pointermove", (e) => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+    if (!sw.active) {
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { sw.active = true; sw.cell.style.transition = "none"; }
+      else if (Math.abs(dy) > 10) { sw = null; return; }
+      else return;
+    }
+    sw.t = Math.min(0, Math.max(-140, sw.base + dx));
+    sw.cell.style.transform = `translateX(${sw.t}px)`;
   });
-  $("#sub-day").innerHTML = Array.from({ length: 31 }, (_, i) => {
-    const n = i + 1, sfx = n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th";
-    return `<option value="${n}" ${n === new Date().getDate() ? "selected" : ""}>Charges on the ${n}${sfx}</option>`;
-  }).join("");
-  on("#sub-form", () => {
-    const price = round2(parseFloat($("#sub-price").value));
-    if (!(price > 0)) return;
-    state.subs.push({ id: uid(), name: $("#sub-name").value.trim(), price, day: +$("#sub-day").value });
-    $("#sub-name").value = ""; $("#sub-price").value = ""; save();
-  });
-  on("#game-form", () => {
-    const status = $("#game-status").value;
-    state.games.unshift({ id: uid(), name: $("#game-name").value.trim(), platform: $("#game-platform").value, status, hours: 0, beatOn: status === "done" ? today() : "" });
-    $("#game-name").value = ""; save();
-  });
+  const endSwipe = () => {
+    if (!sw) return;
+    if (sw.active) {
+      const c = sw.cell; c.style.transition = ""; c.style.transform = "";
+      const open = sw.t < -40;
+      c.classList.toggle("open", open);
+      openRow = open ? c : null;
+      swallowClick = true;
+    }
+    sw = null;
+  };
+  document.addEventListener("pointerup", endSwipe);
+  document.addEventListener("pointercancel", endSwipe);
+
+  // ---------- Taps ----------
+  function remove(kind, id) {
+    const key = { todo: "todos", tx: "tx", sub: "subs", mail: "mail", goal: "goals", game: "games" }[kind];
+    if (kind === "app") state.apps.splice(+id, 1);
+    else if (key) state[key] = state[key].filter((x) => x.id !== id);
+    openRow = null;
+    save();
+  }
+  document.addEventListener("click", (e) => {
+    if (swallowClick) { swallowClick = false; if (!e.target.closest(".del-btn")) { e.preventDefault(); e.stopPropagation(); return; } }
+    const el = e.target.closest("button, [data-close]");
+    if (!el) return;
+    const d = el.dataset;
+    if (d.close !== undefined) closeSheet();
+    else if (d.tab) showTab(d.tab);
+    else if (d.go) { const [t, s] = d.go.split(":"); showTab(t, s); }
+    else if (d.m) showMoney(d.m);
+    else if (d.f) { gameFilter = d.f; document.querySelectorAll("#game-seg button").forEach((c) => c.setAttribute("aria-pressed", String(c === el))); render(); }
+    else if (d.sheet) openSheet(d.sheet);
+    else if (d.goal) { const g = state.goals.find((x) => x.id === d.goal); if (g) openSheet("goalmoney", g); }
+    else if (d.game) { const g = state.games.find((x) => x.id === d.game); if (g) openSheet("gameedit", g); }
+    else if (d.step) {
+      const inp = $("#sheet-form [name=hours]"); const v = Math.max(0, (+inp.value || 0) + +d.step);
+      inp.value = v; $("#hours-val").textContent = v;
+    }
+    else if (d.del) {
+      e.preventDefault(); e.stopPropagation();
+      const [k, id] = d.del.split(":");
+      if (!$("#sheet").hidden && (k === "goal" || k === "game")) closeSheet();
+      remove(k, id); toast("Deleted");
+    }
+    else if (d.erase !== undefined) { const keepColor = state.color; state = defaults(); state.color = keepColor; closeSheet(); save(); toast("Everything erased"); }
+    else if (d.color) { state.color = d.color; save(); }
+    else if (d.toggleTodo) { const t = state.todos.find((x) => x.id === d.toggleTodo); if (t) { t.done = !t.done; save(); if (t.done) toast("Nice work!"); } }
+    else if (d.doneMail) { el.classList.add("on"); setTimeout(() => { state.mail = state.mail.filter((m) => m.id !== d.doneMail); save(); }, 250); }
+    else if (d.clearDone !== undefined) { state.todos = state.todos.filter((t) => !t.done); save(); }
+    else if (el.id === "edit-apps") { editingApps = !editingApps; render(); }
+    else if (el.id === "nav-add") {
+      const map = { home: "new", todo: "todo", games: "game", gmail: "mail" };
+      openSheet(tab === "money" ? { tx: "tx", goals: "goal", subs: "sub" }[moneySeg] : map[tab] || "new");
+    }
+  }, true);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#sheet").hidden) closeSheet(); });
+
   $("#mail-q").addEventListener("input", (e) => {
     const q = e.target.value.trim();
     $("#mail-go").href = "https://mail.google.com/mail/u/0/" + (q ? "#search/" + encodeURIComponent(q) : "#inbox");
   });
-  on("#mail-form", (e) => {
-    state.mail.unshift({ id: uid(), from: $("#mail-from").value.trim(), subject: $("#mail-subject").value.trim(), date: today() });
-    e.target.reset(); save();
-  });
-  on("#app-form", (e) => {
-    state.apps.push({ icon: $("#app-icon").value.trim() || "🔗", name: $("#app-name").value.trim(), url: safeUrl($("#app-url").value) });
-    e.target.reset(); save();
-  });
-  on("#name-form", () => { state.name = $("#name-input").value.trim() || "Hunter"; $("#name-input").blur(); save(); flashSaved(); });
-  on("#city-form", () => { state.city = $("#city-input").value.trim(); $("#city-input").blur(); save(); flashSaved(); });
-  document.addEventListener("submit", (e) => {
-    if (e.target.id !== "home-city") return;
-    e.preventDefault();
-    state.city = $("#home-city-input").value.trim(); save();
-  });
-
-  $("#reset-btn").addEventListener("click", () => ($("#reset-confirm").hidden = false));
-  $("#reset-no").addEventListener("click", () => ($("#reset-confirm").hidden = true));
-  $("#reset-yes").addEventListener("click", () => { state = defaults(); $("#reset-confirm").hidden = true; save(); });
-  $("#clear-done").addEventListener("click", () => { state.todos = state.todos.filter((t) => !t.done); save(); });
-
-  // ---------- Clicks ----------
-  document.addEventListener("click", (e) => {
-    const el = e.target.closest("button"); if (!el) return;
-    const d = el.dataset;
-    if (d.tab) showTab(d.tab);
-    else if (d.gotoMoney) { showTab("money"); showMoney(d.gotoMoney); }
-    else if (d.m) showMoney(d.m);
-    else if (d.f) {
-      gameFilter = d.f;
-      document.querySelectorAll("#game-filter .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === el)));
-      render();
-    }
-    else if (d.color) { state.color = d.color; save(); }
-    else if (d.delApp !== undefined) { e.preventDefault(); state.apps.splice(+d.delApp, 1); save(); }
-    else if (d.delTx) { state.tx = state.tx.filter((x) => x.id !== d.delTx); save(); }
-    else if (d.delGame) { state.games = state.games.filter((g) => g.id !== d.delGame); save(); }
-    else if (d.delTodo) { state.todos = state.todos.filter((t) => t.id !== d.delTodo); save(); }
-    else if (d.delGoal) { state.goals = state.goals.filter((g) => g.id !== d.delGoal); save(); }
-    else if (d.delSub) { state.subs = state.subs.filter((s) => s.id !== d.delSub); save(); }
-    else if (d.hour) { const g = state.games.find((x) => x.id === d.hour); if (g) { g.hours = Math.max(0, g.hours + +d.d); save(); } }
-    else if (d.goalAdd) {
-      const g = state.goals.find((x) => x.id === d.goalAdd);
-      const amt = round2(parseFloat($("#goal-amt-" + d.goalAdd).value));
-      if (g && amt > 0) { g.saved = Math.max(0, round2(g.saved + amt * +d.sign)); save(); }
-    }
-  });
-  document.addEventListener("change", (e) => {
-    const d = e.target.dataset;
-    if (d.doneMail) { state.mail = state.mail.filter((m) => m.id !== d.doneMail); save(); }
-    else if (d.toggleTodo) { const t = state.todos.find((x) => x.id === d.toggleTodo); if (t) { t.done = e.target.checked; save(); } }
-    else if (d.statusGame) {
-      const g = state.games.find((x) => x.id === d.statusGame);
-      if (g) { g.status = e.target.value; if (g.status === "done" && !g.beatOn) g.beatOn = today(); save(); }
-    }
-  });
+  $("#mail-q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("#mail-go").click(); } });
 
   // ---------- Backup ----------
-  const note = (t) => { const n = $("#backup-note"); n.textContent = t; n.hidden = false; };
   $("#export-btn").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const file = new File([blob], `hunters-app-backup-${today()}.json`, { type: "application/json" });
+    const json = JSON.stringify(state, null, 2);
+    const fname = `hunters-app-backup-${today()}.json`;
+    const file = new File([json], fname, { type: "application/json" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file] }).then(() => note("Backup saved."), () => {});
+      navigator.share({ files: [file] }).then(() => toast("Backup saved"), () => {});
       return;
     }
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+    a.href = URL.createObjectURL(file); a.download = fname; a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    note("Backup saved.");
+    toast("Backup saved");
   });
   $("#import-file").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    try { state = { ...defaults(), ...JSON.parse(await f.text()) }; save(); note("Backup restored."); }
-    catch (err) { note("That file isn't a Hunter's App backup."); }
+    try { state = { ...defaults(), ...JSON.parse(await f.text()) }; save(); toast("Backup restored"); }
+    catch (err) { toast("That isn't a Hunter's App backup"); }
     e.target.value = "";
   });
 
   // ---------- Start ----------
   let start = "home";
   try { start = localStorage.getItem(KEY + "-tab") || "home"; } catch (e) {}
-  showTab(start);
   render();
-  setInterval(tick, 30000);
+  showTab(start);
+  setInterval(render, 60000);
 })();
 </script>
 <script>
